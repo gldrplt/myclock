@@ -1,0 +1,121 @@
+#!/bin/bash
+#
+#	myclock
+#
+#	options	-s blank clock display
+#			+s show clock
+#			-b <0-1> set display brightness
+#			-k kill clock
+#			+m show military time (24 hr)
+#			-m show 12 hr time
+#			-f fill display - all segments on
+#			+d show time and date
+#			-d show time only
+
+source /home/pi/.bash_functions
+
+usage()
+{
+msg="
+NAME:
+	myclock - show clock/date on 4 digit 7 segment display
+	
+Usage:
+	myclock [OPTION] 
+
+OPTION:
+
+	+s show clock / date
+	
+	-s blank clock / date display
+	
+	+m show military time
+	
+	-m show 12 hr time
+	
+	+d show date and time
+	
+	-d show time only
+	
+	-b <0-1> set display brightness
+	
+	-f fill display - all segments on
+	
+	-k kill clock
+	
+	? show this message
+	
+	-h show this message
+"
+    echo -e "$msg"
+    exit 1
+}
+#######################
+#
+#	Start of script
+#
+#######################
+[[ $1 == "-h" ]] && usage
+[[ $1 == "?" ]] && usage
+
+pipe=/home/pi/myprojects/myclock/clockpipe
+if [ ! -p "$pipe" ]; then
+	echo -e "\nNamed pipe $pipe does not exist\n\nexiting script ...\n"
+	exit 1
+fi
+
+prompt=$(fwhite "(myclock): ")
+
+isrunning=$(ps axg | grep myclock.py | grep -v grep)
+if [[ $isrunning != "" ]] && [[ $1 == "" ]]; then
+	echo -e "\n"$prompt"myclock.py already running ...\n\nexiting script ...\n"
+	exit 2
+fi
+
+echo
+msgsent="n"	# set message not sent
+if [[ $isrunning == "" ]] && [[ $1 != "-k" ]]; then 
+	if [[ -d "/home/pi/.virtualenvs/myclock" ]]; then	# check if virtual env exists
+		venv=$(env | grep VIRTUAL | grep myclock)		# check if virtualenv active
+		if [[ $venv == "" ]]; then
+			echo -e $prompt"Launching virtual environment (myclock)\n"
+#			source "/home/pi/.local/bin/virtualenvwrapper.sh"
+#			source "/usr/local/bin/virtualenvwrapper.sh"
+			workon "myclock"
+		fi
+	fi
+	
+	# launch myclock.py
+	msgsent="y"	# set message sent
+	echo -e $prompt"Launching 4 digit 7 segment clock\n"
+	cd /home/pi/myprojects/myclock
+	python myclock.py $@  >/dev/null 2>&1 &
+	isrunning="t"
+#	exit 0
+fi
+
+# display option selected
+if [[ $isrunning != "" ]]; then
+	case $1 in
+		-k) echo -e $prompt"Shutting down 4 digit 7 segment display\n";;
+		-f) echo -e $prompt"fill display - all segments on ...\n";;
+		+m) echo -e $prompt"show military time ...\n";;
+		-m) echo -e $prompt"show 12 hr time ...\n";;
+		+s) echo -e $prompt"show clock ...\n";;
+		-s) echo -e $prompt"blank display ...\n";;
+		-b) echo -e $prompt"adjusting display brightness ...\n";;
+		+d) echo -e $prompt"show date and time ...\n";;
+		-d) echo -e $prompt"show time only ...\n";;
+		'') : ;;	
+		*) 
+			echo -e "Invalid option: $1 \n"
+			usage;;	
+	esac
+fi
+
+# send message to myclock.py
+
+#if [[ $1 != "" ]] && [[ $msgsent == "n" ]]; then
+if [[ $isrunning != "" ]] && [[ $msgsent == "n" ]]; then
+	echo $@ >$pipe
+fi
