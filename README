@@ -1,0 +1,13 @@
+############################################
+#
+#	myclock project
+#
+############################################
+
+1. Launched 4 digit 7 segment clock
+
+2. located at ~/myprojects/myclock
+
+3. looks for ~/.virtualenvs/myclock
+
+4. create symbolic link in ~/bin to myclock

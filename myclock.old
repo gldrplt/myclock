@@ -50,18 +50,15 @@ OPTION:
     echo -e "$msg"
     exit 1
 }
-#####################################################
+#######################
 #
 #	Start of script
 #
-#####################################################
+#######################
 [[ $1 == "-h" ]] && usage
 [[ $1 == "?" ]] && usage
 
-pgm=$( realpath $0 )	# get realpath and name of running script
-pgmpath="${pgm%/*}"		# get path
-
-pipe=$pgmpath/clockpipe	# check for pipe file
+pipe=/home/pi/myprojects/myclock/clockpipe
 if [ ! -p "$pipe" ]; then
 	echo -e "\nNamed pipe $pipe does not exist\n\nexiting script ...\n"
 	exit 1
@@ -78,11 +75,12 @@ fi
 echo
 msgsent="n"	# set message not sent
 if [[ $isrunning == "" ]] && [[ $1 != "-k" ]]; then 
-	if [[ -d ~/.virtualenvs/myclock ]]; then		# check if virtual env exists
-		echo $( env | grep VIRTUAL )
-		venv=$(env | grep VIRTUAL | grep myclock)	# check if virtualenv active
+	if [[ -d "/home/pi/.virtualenvs/myclock" ]]; then	# check if virtual env exists
+		venv=$(env | grep VIRTUAL | grep myclock)		# check if virtualenv active
 		if [[ $venv == "" ]]; then
 			echo -e $prompt"Launching virtual environment (myclock)\n"
+#			source "/home/pi/.local/bin/virtualenvwrapper.sh"
+#			source "/usr/local/bin/virtualenvwrapper.sh"
 			workon "myclock"
 		fi
 	fi
@@ -90,9 +88,10 @@ if [[ $isrunning == "" ]] && [[ $1 != "-k" ]]; then
 	# launch myclock.py
 	msgsent="y"	# set message sent
 	echo -e $prompt"Launching 4 digit 7 segment clock\n"
-	cd $pgmpath
+	cd /home/pi/myprojects/myclock
 	python myclock.py $@  >/dev/null 2>&1 &
 	isrunning="t"
+#	exit 0
 fi
 
 # display option selected
@@ -115,6 +114,8 @@ if [[ $isrunning != "" ]]; then
 fi
 
 # send message to myclock.py
+
+#if [[ $1 != "" ]] && [[ $msgsent == "n" ]]; then
 if [[ $isrunning != "" ]] && [[ $msgsent == "n" ]]; then
 	echo $@ >$pipe
 fi
