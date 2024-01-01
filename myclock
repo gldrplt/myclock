@@ -79,7 +79,6 @@ echo
 msgsent="n"	# set message not sent
 if [[ $isrunning == "" ]] && [[ $1 != "-k" ]]; then 
 	if [[ -d ~/.virtualenvs/myclock ]]; then		# check if virtual env exists
-		echo $( env | grep VIRTUAL )
 		venv=$(env | grep VIRTUAL | grep myclock)	# check if virtualenv active
 		if [[ $venv == "" ]]; then
 			echo -e $prompt"Launching virtual environment (myclock)\n"
