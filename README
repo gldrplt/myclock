@@ -10,4 +10,5 @@
 
 3. looks for ~/.virtualenvs/myclock
 
-4. create symbolic link in ~/bin to myclock
+4. create symbolic link in ~/bin to myclock shellscript
+   in ~/.virtulenvs/myclock

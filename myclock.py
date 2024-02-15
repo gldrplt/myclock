@@ -1,4 +1,4 @@
-############################
+#########################################################
 #
 #   myclock.py
 #
@@ -12,12 +12,9 @@
 #			+d show time and date
 #			-d show time only
 #
-############################
+#########################################################
 
 def showclock(msgevent, display):
-
-    print("\nDisplay time on 4 digit 7 segment display ...\n")
-    
     while True:
         msgevent.clear()
 
@@ -66,27 +63,39 @@ def showclock(msgevent, display):
                     time.sleep(0.7)
     
         except KeyboardInterrupt:
-            print("\rUser pressed Ctrl-c\n")
+            signum = 2  # stop signal
+            stop(signum, frame)
+
         finally:
             pass
-        
-        print("waiting for message event...")
-        msgevent.wait() # wait for msg to be sent
 
 def stop(signum, frame):
     global showflag
 
     signame = signal.Signals(signum).name   # python < 3.8
-    
-    print("\n", signum, signame)
-    print("\nTerminate signal sent ...\n")
-    print("Clearing display ...\n")
+    print("\r  \n", end="")
+    printmsg(str(signum) + " " + signame)
+    printmsg("Terminate signal sent ...\n")
+    printmsg("Clearing display ...\n")
 
     showflag = False
     display.fill(0)
 
     exit()
-    
+
+def fmtts(time):
+    z = time
+    hms = z.strftime("%H:%M:%S")    # hours:min:sec
+    ms = z.strftime(".%f")          # microseconds 6 digits
+    ms = ms[0:3]                    # 2 digits
+    ts = hms +ms
+    return ts
+
+def printmsg(msg):
+    z = datetime.now()
+    ts = fmtts(z)
+    print("\t    " + ts + " " + msg)
+
 ###################################    
 #   Start of Program
 ###################################
@@ -124,7 +133,8 @@ runflag = True
 msgevent = Event()
 t1 = Thread(target = showclock, args = (msgevent, display), daemon=True)
 t1.start()
-time.sleep(.5)
+
+#time.sleep(.5)
 
 # get command line parameters if passed
 clparm = ""
@@ -139,14 +149,21 @@ if len(sys.argv) > 1:
 path = os.path.dirname(os.path.abspath(__file__))
 pipefile = path + "/clockpipe"
 
+# print start message to stdout
+z = datetime.now()
+ts = fmtts(z)
+msg = z.strftime("%Y %b %d %H:%M:%S") + "    Launching 4 digit 7 segment display\n"
+print(msg)
+
+# main loop
 while runflag:
     try:
         while True:
             if clparm == "":
-                print("waiting for message\n")            
-                f = open(pipefile, "r")      # read from clockpipe
-                                                # system will block until other end
-                                                # is connected
+                printmsg("waiting for message event")
+                f = open(pipefile, "r")     # read from clockpipe
+                                            # system will block until other end
+                                            # is connected
                 parm = f.readline()
                 f.close()
             else:
@@ -156,69 +173,66 @@ while runflag:
             if parm.endswith("\n"):         # strip new line char
                 parm = parm[:len(parm)-1]
                 
-            print("message = "+parm+":", "length =",len(parm))        # echo parm
             z = parm.split(" ")
-            print ("z = ",z)
             if len(z) == 2:
                 z = parm.split(" ")           
-                print(z[0])
-                print(z[1])
 
             if z[0] == "-b":
                 br=float(z[1])
-                print("display.brightness = ",br)
+                printmsg("... setting display brightness " + z[1])
                 display.brightness = br
 
             if parm == "+m" :
-                print("... milflag = true...")
+                printmsg("... display military time ...")
                 milflag = True
             elif parm == "-m":
-                print("... milflag = false...")
+                printmsg("... display standard 12hr time ...")
                 milflag = False
 
             if parm == "-k":
-                print("... kill display ...\n")
+                printmsg("... kill display ...\n")
                 showflag = False
                 raise KeyboardInterrupt("User pressed Ctrl-C ...")
 
             if parm == "-s":
-                print("... blanking display ...")
+                printmsg("... blanking display ...")
                 display.fill(0)
                 showflag = False
 
             if parm == "+s":
-                print("... show clock ...")
+                printmsg("... show clock ...")
                 showflag = True
 
             if parm =="-f":
-                print("... fill display ...")
+                printmsg("... fill display ...")
                 display.fill(1)
                 showflag = False
 
             if parm =="+d":
-                print("... show time and date ...")
+                printmsg("... show time and date ...")
                 dateflag = True
                 showflag = True
             
             if parm =="-d":
-                print("... show time only ...")
+                printmsg("... show time only ...")
                 dateflag = False
                 showflag = True
 
             time.sleep(.5)
-            msgevent.set()                  # raise message sent event
+#            msgevent.set()                  # raise message sent event
     
     except KeyboardInterrupt:
         runflag = False
-        print("\rUser raised exception Ctrl-C ...")
-        print("Cleaning up ...\n")
+        print("\r  ", end="")
+        printmsg("User raised exception Ctrl-C ...")
+        printmsg("Cleaning up ...\n")
         # clear display
         display.fill(0)
 
     finally:
         pass
         
-print("... myclock.py ended ...\n")
+printmsg("... myclock.py ended ...\n")
 
 
 
