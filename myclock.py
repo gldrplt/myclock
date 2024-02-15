@@ -14,10 +14,9 @@
 #
 #########################################################
 
-def showclock(msgevent, display):
+def showclock(display):
     while True:
-        msgevent.clear()
-
+        
         # build month/year for display of date
         date = datetime.now().strftime("%m%d")
         colontime = time.time() - 0.5
@@ -130,8 +129,8 @@ display.fill(0)
 milflag = False
 showflag = True
 runflag = True
-msgevent = Event()
-t1 = Thread(target = showclock, args = (msgevent, display), daemon=True)
+
+t1 = Thread(target = showclock, args = (display,), daemon=True)
 t1.start()
 
 #time.sleep(.5)
@@ -219,7 +218,6 @@ while runflag:
                 showflag = True
 
             time.sleep(.5)
-#            msgevent.set()                  # raise message sent event
     
     except KeyboardInterrupt:
         runflag = False
