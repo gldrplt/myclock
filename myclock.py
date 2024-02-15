@@ -65,6 +65,13 @@ def showclock(display):
             signum = 2  # stop signal
             stop(signum, frame)
 
+        except:
+            printmsg("Unknown error thrown")
+            printmsg("Clearing display ...\n")
+            printmsg("exiting showclock thread ...\n")
+            display.fill(0)
+            exit()
+
         finally:
             pass
 
@@ -223,13 +230,18 @@ while runflag:
         runflag = False
         print("\r  ", end="")
         printmsg("User raised exception Ctrl-C ...")
-        printmsg("Cleaning up ...\n")
-        # clear display
-        display.fill(0)
+    
+    except:
+        runflag = False
+        printmsg("Unknown error thrown ...")
 
     finally:
         pass
-        
+
+printmsg("Cleaning up ...\n")
+# clear display
+display.fill(0)
+
 printmsg("... myclock.py ended ...\n")
 
 
