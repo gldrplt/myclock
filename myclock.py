@@ -34,6 +34,8 @@ def showclock(display):
                     # get system time
                     now = datetime.now()
                     hour = now.hour
+                    if hour == 0:                       # if hour = 0 change to 12
+                        hour = 12
                     if hour >12 and milflag == False:    # convert to 12hr time
                         hour = hour - 12
                     minute = now.minute

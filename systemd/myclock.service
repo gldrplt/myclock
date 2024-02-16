@@ -1,11 +1,16 @@
 [Unit]
 Description=Start myclock service
 
+# set User
 [Service]
 Type=simple
-
+# for virtual envs
 ExecStart=/home/pi/.virtualenvs/myclock/bin/python -u\
 	 /home/pi/myprojects/myclock/myclock.py -b 0 
+
+# if no virtual env
+#User=<user>
+#ExecStart=/usr/bin/python <command>
 
 StandardOutput=file:/home/pi/myclock.stdout.log
 StandardError=file:/home/pi/myclock.stderr.log
