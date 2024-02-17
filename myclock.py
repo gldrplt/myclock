@@ -15,7 +15,8 @@
 #########################################################
 
 def showclock(display):
-    while True:
+    global threadflag
+    while threadflag:
         
         # build month/year for display of date
         date = datetime.now().strftime("%m%d")
@@ -67,18 +68,22 @@ def showclock(display):
             signum = 2  # stop signal
             stop(signum, frame)
 
-        except:
+        except Exception as error:
             printmsg("Unknown error thrown")
-            printmsg("Clearing display ...\n")
-            printmsg("exiting showclock thread ...\n")
-            display.fill(0)
-            exit()
+            printmsg("Error name = "+type(error).__name__)
+            threadflag = False
 
         finally:
             pass
 
+    printmsg("Clearing display ...\n")
+    display.fill(0)
+    printmsg("Exiting showclock thread ...\n")
+    sys.exit()
+
 def stop(signum, frame):
     global showflag
+    global threadflag
 
     signame = signal.Signals(signum).name   # python < 3.8
     print("\r  \n", end="")
@@ -88,8 +93,6 @@ def stop(signum, frame):
 
     showflag = False
     display.fill(0)
-
-    exit()
 
 def fmtts(time):
     z = time
@@ -135,9 +138,10 @@ display = segments.Seg7x4(i2c)
 display.fill(0)
 
 #   start clock thread
-milflag = False
-showflag = True
-runflag = True
+threadflag = True   # thread flag
+milflag = False     # show 12 hour time
+showflag = True     # tell thread to show display
+runflag = True      # main program run flag
 
 t1 = Thread(target = showclock, args = (display,), daemon=True)
 t1.start()
@@ -168,7 +172,7 @@ while runflag:
     try:
         while True:
             if clparm == "":
-                printmsg("waiting for message event")
+                printmsg("waiting for message event\n")
                 f = open(pipefile, "r")     # read from clockpipe
                                             # system will block until other end
                                             # is connected
@@ -198,9 +202,9 @@ while runflag:
                 milflag = False
 
             if parm == "-k":
-                printmsg("... kill display ...\n")
+                printmsg("... kill display ...")
                 showflag = False
-                raise KeyboardInterrupt("User pressed Ctrl-C ...")
+                raise KeyboardInterrupt("User sent kill display ...")
 
             if parm == "-s":
                 printmsg("... blanking display ...")
@@ -230,12 +234,15 @@ while runflag:
     
     except KeyboardInterrupt:
         runflag = False
+        threadflag = False
         print("\r  ", end="")
         printmsg("User raised exception Ctrl-C ...")
     
-    except:
+    except Exception as error:
         runflag = False
+        threadflag = False
         printmsg("Unknown error thrown ...")
+        printmsg("Error Name = "+type(error).__name__)
 
     finally:
         pass
@@ -245,7 +252,3 @@ printmsg("Cleaning up ...\n")
 display.fill(0)
 
 printmsg("... myclock.py ended ...\n")
-
-
-
-

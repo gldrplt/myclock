@@ -1,0 +1,16 @@
+[Unit]
+Description=Start myclock service
+
+[Service]
+Type=simple
+
+ExecStart=/home/pi/.virtualenvs/myclock/bin/python -u\
+	 /home/pi/myprojects/myclock/myclock.py -b 0 
+
+StandardOutput=file:/home/pi/myclock.stdout.log
+StandardError=file:/home/pi/myclock.stderr.log
+#Restart=always
+#RestartSec=1s
+
+[Install]
+WantedBy=multi-user.target
