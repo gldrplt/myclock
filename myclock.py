@@ -16,6 +16,8 @@
 
 def showclock(display):
     global threadflag
+    global runflag
+
     while threadflag:
         
         # build month/year for display of date
@@ -67,23 +69,27 @@ def showclock(display):
         except KeyboardInterrupt:
             signum = 2  # stop signal
             stop(signum, frame)
-
-        except Exception as error:
-            printmsg("Unknown error thrown")
-            printmsg("Error name = "+type(error).__name__)
             threadflag = False
 
+        except Exception as error:
+            printmsg("(thread) Exception thrown ...")
+            printmsg("(thread) Exception name = "+type(error).__name__)
+            threadflag = False
+            
         finally:
             pass
 
-    printmsg("Clearing display ...\n")
+    printmsg("(thread) Clearing display ...\n")
     display.fill(0)
-    printmsg("Exiting showclock thread ...\n")
+    printmsg("(thread) Exiting showclock thread ...\n")
+    runflag = False
     sys.exit()
 
 def stop(signum, frame):
     global showflag
     global threadflag
+    global runflag
+    global f
 
     signame = signal.Signals(signum).name   # python < 3.8
     print("\r  \n", end="")
@@ -94,12 +100,16 @@ def stop(signum, frame):
     showflag = False
     display.fill(0)
 
+    threadflag = False
+    runflag = False
+    raise SystemExit    # Raise exception to exit main program
+
 def fmtts(time):
     z = time
     hms = z.strftime("%H:%M:%S")    # hours:min:sec
     ms = z.strftime(".%f")          # microseconds 6 digits
     ms = ms[0:3]                    # 2 digits
-    ts = hms +ms
+    ts = hms + ms
     return ts
 
 def printmsg(msg):
@@ -236,19 +246,25 @@ while runflag:
         runflag = False
         threadflag = False
         print("\r  ", end="")
-        printmsg("User raised exception Ctrl-C ...")
+        printmsg("(main) User raised exception Ctrl-C ...")
+
+    except SystemExit:
+        runflag = False
+        threadflag = False
+    
+        printmsg("(main) User raised SystemExit ...")
     
     except Exception as error:
         runflag = False
         threadflag = False
-        printmsg("Unknown error thrown ...")
-        printmsg("Error Name = "+type(error).__name__)
+        printmsg("(main) Exception thrown ...")
+        printmsg("(main) Exception Name = "+type(error).__name__)
 
     finally:
         pass
 
-printmsg("Cleaning up ...\n")
+printmsg("(main) Cleaning up ...\n")
 # clear display
 display.fill(0)
 
-printmsg("... myclock.py ended ...\n")
+printmsg("(main) ... myclock.py ended ...\n")
