@@ -1,4 +1,5 @@
-# gitignore patterns for clockpipe
+# gitignore patterns for myclock
 
 clockpipe
-
+*.log
+*.old
