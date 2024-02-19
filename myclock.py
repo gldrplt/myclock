@@ -18,6 +18,10 @@ def showclock(display):
     global threadflag
     global runflag
 
+    x = os.getpid()
+    tpid = str(x)
+    printmsg("Thread PID = "+tpid+"\n")
+
     while threadflag:
         
         # build month/year for display of date
@@ -174,8 +178,16 @@ pipefile = path + "/clockpipe"
 # print start message to stdout
 z = datetime.now()
 ts = fmtts(z)
-msg = z.strftime("%Y %b %d %H:%M:%S") + "    Launching 4 digit 7 segment display\n"
+#msg = z.strftime("%Y %b %d %H:%M:%S") + "    Launching 4 digit 7 segment display\n"
+msg = z.strftime("%Y %b %d ") + ts + " Launching 4 digit 7 segment display\n"
 print(msg)
+
+# get PID
+x = os.getpid()
+pid = str(x)
+printmsg("myclock.py PID = "+pid)
+
+time.sleep(.2)  # wait for thread to start
 
 # main loop
 while runflag:
@@ -263,8 +275,8 @@ while runflag:
     finally:
         pass
 
-printmsg("(main) Cleaning up ...\n")
+printmsg("(main) Clearing display ...\n")
 # clear display
 display.fill(0)
 
-printmsg("(main) ... myclock.py ended ...\n")
+printmsg("(main) Exiting myclock.py ...\n")
