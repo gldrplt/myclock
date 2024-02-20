@@ -1,6 +1,6 @@
 ############################################
 #
-#	myclock project
+#	myclock project v2.0
 #
 ############################################
 
@@ -12,3 +12,7 @@
 
 4. create symbolic link in ~/bin to myclock shellscript
    in ~/myprojects/myclock
+
+5. added logging
+
+6. insures showclock thread is terminated
