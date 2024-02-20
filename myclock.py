@@ -18,10 +18,6 @@ def showclock(display):
     global threadflag
     global runflag
 
-    x = os.getpid()
-    tpid = str(x)
-    printmsg("Thread PID = "+tpid+"\n")
-
     while threadflag:
         
         # build month/year for display of date
@@ -185,8 +181,8 @@ logfile = path + "/myclock.log"
 
 # trim log file to 4 days
 logdays = 5
-split = "Launching"
-mcf.trimlog(logfile, logdays, split)
+splitstr = "Launching"
+mcf.trimlog(logfile, logdays, splitstr)
 
 # print start message to stdout
 msg = "Launching 4 digit 7 segment display\n"

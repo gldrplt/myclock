@@ -3,14 +3,14 @@
 #   Functions used by GarageWeb application
 import os
 
-def trimlog(logfile, logdays, split):
+def trimlog(logfile, logdays, splitstr):
     try:
         f = open(logfile,'r')
         z = f.read()        # get current log file data
         f.close()
-        a = z.split(split)
+        a = z.split(splitstr)
         i = len(a)
-        if i <= logdays+ 1:     # check if log file exceeds gwLogDays
+        if i <= logdays + 1:     # check if log file exceeds gwLogDays
             return
     except:
         return
