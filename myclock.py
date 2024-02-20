@@ -89,8 +89,7 @@ def stop(signum, frame):
     global showflag
     global threadflag
     global runflag
-    global f
-
+    
     signame = signal.Signals(signum).name   # python < 3.8
     print("\r  \n", end="")
     printmsg(str(signum) + " " + signame)
@@ -114,8 +113,13 @@ def fmtts(time):
 
 def printmsg(msg):
     z = datetime.now()
-    ts = fmtts(z)
-    print("\t    " + ts + " " + msg)
+    ts = z.strftime("%Y %b %d %H:%M:%S ")
+    print(ts + msg)
+    x = ts + msg + "\n"
+    
+    f = open("myclock.log", "a")
+    f.write(x)
+    f.close()
 
 ###################################    
 #   Start of Program
@@ -172,17 +176,15 @@ path = os.path.dirname(os.path.abspath(__file__))
 pipefile = path + "/clockpipe"
 
 # print start message to stdout
-z = datetime.now()
-ts = fmtts(z)
-msg = z.strftime("%Y %b %d %H:%M:%S") + "    Launching 4 digit 7 segment display\n"
-print(msg)
+msg = "Launching 4 digit 7 segment display\n"
+printmsg(msg)
 
 # main loop
 while runflag:
     try:
         while True:
             if clparm == "":
-                printmsg("waiting for message event\n")
+                printmsg("(main) waiting for message event\n")
                 f = open(pipefile, "r")     # read from clockpipe
                                             # system will block until other end
                                             # is connected
@@ -201,42 +203,42 @@ while runflag:
 
             if z[0] == "-b":
                 br=float(z[1])
-                printmsg("... setting display brightness " + z[1])
+                printmsg("(main) ... setting display brightness " + z[1])
                 display.brightness = br
 
             if parm == "+m" :
-                printmsg("... display military time ...")
+                printmsg("(main) ... display military time ...")
                 milflag = True
             elif parm == "-m":
-                printmsg("... display standard 12hr time ...")
+                printmsg("(main) ... display standard 12hr time ...")
                 milflag = False
 
             if parm == "-k":
-                printmsg("... kill display ...")
+                printmsg("(main) ... kill display ...")
                 showflag = False
                 raise KeyboardInterrupt("User sent kill display ...")
 
             if parm == "-s":
-                printmsg("... blanking display ...")
+                printmsg("(main) ... blanking display ...")
                 display.fill(0)
                 showflag = False
 
             if parm == "+s":
-                printmsg("... show clock ...")
+                printmsg("(main) ... show clock ...")
                 showflag = True
 
             if parm =="-f":
-                printmsg("... fill display ...")
+                printmsg("(main) ... fill display ...")
                 display.fill(1)
                 showflag = False
 
             if parm =="+d":
-                printmsg("... show time and date ...")
+                printmsg("(main) ... show time and date ...")
                 dateflag = True
                 showflag = True
             
             if parm =="-d":
-                printmsg("... show time only ...")
+                printmsg("(main) ... show time only ...")
                 dateflag = False
                 showflag = True
 
@@ -245,7 +247,7 @@ while runflag:
     except KeyboardInterrupt:
         runflag = False
         threadflag = False
-        print("\r  ", end="")
+    #    print("\r  ", end="")
         printmsg("(main) User raised exception Ctrl-C ...")
 
     except SystemExit:
@@ -258,7 +260,7 @@ while runflag:
         runflag = False
         threadflag = False
         printmsg("(main) Exception thrown ...")
-        printmsg("(main) Exception Name = "+type(error).__name__)
+        printmsg("(main) Exception Name = " + type(error).__name__)
 
     finally:
         pass
