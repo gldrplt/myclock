@@ -1,6 +1,6 @@
 ############################################
 #
-#	myclock project
+#	myclock project v2.0
 #
 ############################################
 
@@ -11,4 +11,8 @@
 3. looks for ~/.virtualenvs/myclock
 
 4. create symbolic link in ~/bin to myclock shellscript
-   in ~/.virtulenvs/myclock
+   in ~/myprojects/myclock
+
+5. added logging
+
+6. insures showclock thread is terminated

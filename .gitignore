@@ -4,3 +4,5 @@ clockpipe
 
 *.log
 *.txt
+*.new
+*.old

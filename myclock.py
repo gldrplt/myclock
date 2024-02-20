@@ -79,9 +79,9 @@ def showclock(display):
         finally:
             pass
 
-    printmsg("(thread) Clearing display ...\n")
+    printmsg("(thread) Clearing display ...")
     display.fill(0)
-    printmsg("(thread) Exiting showclock thread ...\n")
+    printmsg("(thread) Exiting showclock thread ...")
     runflag = False
     sys.exit()
 
@@ -93,8 +93,8 @@ def stop(signum, frame):
     signame = signal.Signals(signum).name   # python < 3.8
     print("\r  \n", end="")
     printmsg(str(signum) + " " + signame)
-    printmsg("Terminate signal sent ...\n")
-    printmsg("Clearing display ...\n")
+    printmsg("Terminate signal sent ...")
+    printmsg("Clearing display ...")
 
     showflag = False
     display.fill(0)
@@ -112,12 +112,16 @@ def fmtts(time):
     return ts
 
 def printmsg(msg):
-    z = datetime.now()
-    ts = z.strftime("%Y %b %d %H:%M:%S ")
-    print(ts + msg)
-    x = ts + msg + "\n"
+    z = datetime.now()                          # get current time
+    if "Launching" in msg:
+        ts = z.strftime("%Y %b %d %H:%M:%S ")   # format time stamp for Launch msg
+    else:
+        ts = z.strftime("\t    %H:%M:%S ")       # format time stamp for all other msg
     
-    f = open("myclock.log", "a")
+    print(ts + msg)                             # print msg to stdout
+    
+    x = ts + msg + "\n"                         # add new line symbol to msg
+    f = open(logfile, "a")                      # write msg to log file
     f.write(x)
     f.close()
 
@@ -134,6 +138,7 @@ from datetime import datetime
 from adafruit_ht16k33 import segments
 import board
 import busio
+import mc_Functions as mcf
 
 dateflag = False     # show clock and date flag
 
@@ -160,8 +165,6 @@ runflag = True      # main program run flag
 t1 = Thread(target = showclock, args = (display,), daemon=True)
 t1.start()
 
-#time.sleep(.5)
-
 # get command line parameters if passed
 clparm = ""
 if len(sys.argv) > 1:
@@ -174,6 +177,12 @@ if len(sys.argv) > 1:
 # get path of this program
 path = os.path.dirname(os.path.abspath(__file__))
 pipefile = path + "/clockpipe"
+logfile = path + "/myclock.log"
+
+# trim log file to 4 days
+logdays = 5
+split = "Launching"
+mcf.trimlog(logfile, logdays, split)
 
 # print start message to stdout
 msg = "Launching 4 digit 7 segment display\n"
@@ -247,7 +256,7 @@ while runflag:
     except KeyboardInterrupt:
         runflag = False
         threadflag = False
-    #    print("\r  ", end="")
+        print("\r  ", end="")
         printmsg("(main) User raised exception Ctrl-C ...")
 
     except SystemExit:
