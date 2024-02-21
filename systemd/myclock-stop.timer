@@ -1,0 +1,12 @@
+[Unit]
+Description="Stop myclock.service timer"
+
+[Timer]
+#OnActiveSec=10seconds
+
+OnCalendar=Mon..Sun *-*-* 23:00:*
+
+Unit=myclock-stop.service
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,7 @@
+[Unit]
+Description="Service to stop myclock.service"
+
+[Service]
+ExecStart=systemctl stop myclock
+
+
