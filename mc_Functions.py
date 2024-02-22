@@ -2,6 +2,7 @@
 #
 #   Functions used by GarageWeb application
 import os
+import getopt
 
 def trimlog(logfile, logdays, splitstr):
     try:
@@ -30,7 +31,7 @@ def trimlog(logfile, logdays, splitstr):
             d=a[j+1]        #   d contains second part of log day
             l = d.rindex('\n') + 1
             e = d[0:l]      #   e is second part of log day
-        logday = c + split + e  #   build log day entry
+        logday = c + splitstr + e  #   build log day entry
         outlog = outlog + logday  #   add log day to trimlog
 
 

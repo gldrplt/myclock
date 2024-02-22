@@ -116,7 +116,10 @@ def printmsg(msg):
     if "Launching" in msg:
         ts = z.strftime("%Y %b %d %H:%M:%S ")   # format time stamp for Launch msg
     else:
-        ts = z.strftime("\t    %H:%M:%S ")       # format time stamp for all other msg
+        if logdateflag:                             # format time stamp for all other msg
+            ts = z.strftime("%Y %b %d %H:%M:%S ")   # show date
+        else:
+            ts = z.strftime("\t    %H:%M:%S ")       # don't show date
     
     print(ts + msg)                             # print msg to stdout
     
@@ -125,11 +128,39 @@ def printmsg(msg):
     f.write(x)
     f.close()
 
+def procparmstr(parmstr):
+    global clparm
+    global logdateflag
+    try:
+        options, remainder = getopt.getopt(parmstr, "", ['date',
+                                                        'nodate'])
+        for opt, arg in options:
+            if opt in ('--date'):
+                logdateflag = True
+            elif opt in ('--nodate'):
+                logdateflag = False
+        tparm = remainder      # set clparm to remaing parms
+
+    except:
+        tparm = parmstr
+
+    if len(tparm) == 0:
+        clparm = ""
+    elif len(tparm) == 1:
+        clparm = tparm[0]
+    elif len(tparm) > 1:
+        n = len(tparm)
+        z = ""
+        for i in range(0,n):
+            z = z + tparm[i] + " "
+        clparm = z
+
 ###################################    
 #   Start of Program
 ###################################
 import os
 import sys
+import getopt
 import signal
 import time
 from threading import Thread
@@ -165,14 +196,35 @@ runflag = True      # main program run flag
 t1 = Thread(target = showclock, args = (display,), daemon=True)
 t1.start()
 
-# get command line parameters if passed
-clparm = ""
-if len(sys.argv) > 1:
-    n = len(sys.argv)
-    z = ""
-    for i in range(1,n):
-        z = z + sys.argv[i] + " "
-    clparm = z.rstrip()  # set command line parm entered flag
+# process command line parameters if passed
+# look for --date or --nodate
+logdateflag = False
+clparm = sys.argv[1:]
+procparmstr(clparm)
+
+# try:
+#     options, remainder = getopt.getopt(clparm, "", ['date',
+#                                                   'nodate'])
+#     for opt, arg in options:
+#         if opt in ('--date'):
+#             logdateflag = True
+#         elif opt in ('--nodate'):
+#             logdateflag = False
+#     clparm = remainder      # set clparm to remaing parms
+
+# except:
+#     pass
+# if len(clparm) == 0:
+#     clparm = ""
+# elif len(clparm == 1):
+#     clparm = clparm[0]
+# elif len(clparm) > 1:
+#     n = len(clparm)
+#     z = ""
+#     for i in range(0,n):
+#         z = z + clparm[i] + " "
+
+#clparm = z.rstrip()
 
 # get path of this program
 path = os.path.dirname(os.path.abspath(__file__))
@@ -199,16 +251,16 @@ while runflag:
                                             # is connected
                 parm = f.readline()
                 f.close()
+                args = parm.split()
+                procparmstr(args)           # process parmstr
+                                            # look for --date or --nodate
+                clparm = ""
             else:
                 parm = clparm
                 clparm = ""
 
-            if parm.endswith("\n"):         # strip new line char
-                parm = parm[:len(parm)-1]
-                
+            parm = parm.rstrip()        # remove \n if present                
             z = parm.split(" ")
-            if len(z) == 2:
-                z = parm.split(" ")           
 
             if z[0] == "-b":
                 br=float(z[1])
@@ -251,8 +303,14 @@ while runflag:
                 dateflag = False
                 showflag = True
 
-            time.sleep(.5)
-    
+            if parm == "--nodate":
+                logdateflag = False
+                printmsg("(main) ... do not show full date yyyy/mm/dd in log file ...")
+
+            if parm == "--date":
+                logdateflag = True
+                printmsg("(main) ... show full date yyyy/mm/dd in log file ...")
+
     except KeyboardInterrupt:
         runflag = False
         threadflag = False
