@@ -14,8 +14,8 @@ ExecStartPre=-cp /home/pi/myprojects/myclock/myclock.stdout.log \
 ExecStartPre=-cp /home/pi/myprojects/myclock/myclock.stderr.log \
 		/home/pi/myprojects/myclock/myclock.stderr.old
 
-ExecStartPre=-rm /home/pi/myprojects/myclock.stdout.log
-ExecStartPre=-rm /home/pi/myprojects/myclock.stderr.log
+ExecStartPre=-rm /home/pi/myprojects/myclock/myclock.stdout.log
+ExecStartPre=-rm /home/pi/myprojects/myclock/myclock.stderr.log
 
 ExecStart=/usr/bin/python -u\
 	 /home/pi/myprojects/myclock/myclock.py -b 0 
