@@ -14,6 +14,10 @@
 #
 #########################################################
 
+# define user-defined exception
+class myKillException(Exception):
+    pass
+
 def showclock(display):
     global threadflag
     global runflag
@@ -75,14 +79,16 @@ def showclock(display):
             printmsg("(thread) Exception thrown ...")
             printmsg("(thread) Exception name = "+type(error).__name__)
             threadflag = False
-            
+            raise
+
         finally:
             pass
-
+    
     printmsg("(thread) Clearing display ...")
     display.fill(0)
     printmsg("(thread) Exiting showclock thread ...")
     runflag = False
+    raise myKillException
     sys.exit()
 
 def stop(signum, frame):
@@ -202,30 +208,6 @@ logdateflag = False
 clparm = sys.argv[1:]
 procparmstr(clparm)
 
-# try:
-#     options, remainder = getopt.getopt(clparm, "", ['date',
-#                                                   'nodate'])
-#     for opt, arg in options:
-#         if opt in ('--date'):
-#             logdateflag = True
-#         elif opt in ('--nodate'):
-#             logdateflag = False
-#     clparm = remainder      # set clparm to remaing parms
-
-# except:
-#     pass
-# if len(clparm) == 0:
-#     clparm = ""
-# elif len(clparm == 1):
-#     clparm = clparm[0]
-# elif len(clparm) > 1:
-#     n = len(clparm)
-#     z = ""
-#     for i in range(0,n):
-#         z = z + clparm[i] + " "
-
-#clparm = z.rstrip()
-
 # get path of this program
 path = os.path.dirname(os.path.abspath(__file__))
 pipefile = path + "/clockpipe"
@@ -320,14 +302,19 @@ while runflag:
     except SystemExit:
         runflag = False
         threadflag = False
-    
         printmsg("(main) User raised SystemExit ...")
     
+    except myKillException as err:
+        runflag = False
+        printmsg("(main) thread sends myKillException ...")
+        # raise # stops program
+
     except Exception as error:
         runflag = False
         threadflag = False
         printmsg("(main) Exception thrown ...")
         printmsg("(main) Exception Name = " + type(error).__name__)
+        raise
 
     finally:
         pass

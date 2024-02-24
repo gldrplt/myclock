@@ -106,6 +106,15 @@ if [[ $isrunning != "" ]]; then
 		-b) echo -e $prompt"adjusting display brightness ...\n";;
 		+d) echo -e $prompt"show date and time ...\n";;
 		-d) echo -e $prompt"show time only ...\n";;
+		log)
+			if [[ -f $pgmpath/myclock.log ]]; then
+				echo -e $prompt"show $pgmpath/myclock.log\n"
+				cat $pgmpath/myclock.log
+			else
+				echo -e $prompt"no logfile ... $pgmpath/myclock.log\n"
+			fi
+			msgsent="y"
+			;;
 		'') : ;;	
 		--date) echo -e $prompt"show full date yyyy/mm/dd in log file ...\n";;
 		--nodate) echo -e $prompt"do not show yyyy/mm/dd in logfile ...\n";;
