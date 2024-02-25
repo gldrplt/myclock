@@ -1,23 +1,28 @@
 [Unit]
 Description=Start myclock service
-Requires=gw_log.service
-After=gw_log.service
+#Requires=gw_log.service
+#After=gw_log.service
 DefaultDependencies=no
 
 [Service]
 Type=simple
 # set User to find locally installed python modules
 User=pi
-ExecStartPre=-cp /home/pi/myprojects/myclock/myclock.stdout.log \
+ExecStartPre=-cp -b /home/pi/myprojects/myclock/myclock.stdout.log \
 		/home/pi/myprojects/myclock/myclock.stdout.old
 
-ExecStartPre=-cp /home/pi/myprojects/myclock/myclock.stderr.log \
+ExecStartPre=-cp -b /home/pi/myprojects/myclock/myclock.stderr.log \
 		/home/pi/myprojects/myclock/myclock.stderr.old
 
 ExecStartPre=-rm /home/pi/myprojects/myclock/myclock.stdout.log
 ExecStartPre=-rm /home/pi/myprojects/myclock/myclock.stderr.log
 
-ExecStart=/usr/bin/python -u\
+# ExecStart for non virtual env
+#ExecStart=/usr/bin/python -u\
+#	 /home/pi/myprojects/myclock/myclock.py -b 0 
+
+# ExecStart for virtual env
+ExecStart=/home/pi/.virtualenvs/myclock/bin/python -u\
 	 /home/pi/myprojects/myclock/myclock.py -b 0 
 
 StandardOutput=file:/home/pi/myprojects/myclock/myclock.stdout.log

@@ -74,6 +74,7 @@ def showclock(display):
             signum = 2  # stop signal
             stop(signum, frame)
             threadflag = False
+            printstderr("(thread) User pressed Ctrl-c ...")
 
         except Exception as error:
             printmsg("(thread) Exception thrown ...")
@@ -133,6 +134,12 @@ def printmsg(msg):
     f = open(logfile, "a")                      # write msg to log file
     f.write(x)
     f.close()
+
+def printstderr(msg):   # print to stderr
+    z=datetime.now()
+    ts = z.strftime("%Y %b %d %H:%M:%S ")
+    x = ts + msg + "\n"
+    print(x, file=sys.stderr)
 
 def procparmstr(parmstr):
     global clparm
@@ -298,6 +305,7 @@ while runflag:
         threadflag = False
         print("\r  ", end="")
         printmsg("(main) User raised exception Ctrl-C ...")
+        printstderr("(main) User pressed Ctrl-c ...")
 
     except SystemExit:
         runflag = False
