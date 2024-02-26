@@ -70,15 +70,16 @@ def showclock(display):
                     display.print(date)
                     time.sleep(0.7)
     
-        except KeyboardInterrupt:
-            signum = 2  # stop signal
-            stop(signum, frame)
-            threadflag = False
-            printstderr("(thread) User pressed Ctrl-c ...")
+        # except KeyboardInterrupt:
+        #     signum = 2  # stop signal
+        #     stop(signum, frame)
+        #     threadflag = False
+        #     printstderr("(thread) User pressed Ctrl-c ...")
 
         except Exception as error:
             printmsg("(thread) Exception thrown ...")
             printmsg("(thread) Exception name = "+type(error).__name__)
+            signal.raise_signal(signal.SIGTERM)
             threadflag = False
             raise
 
@@ -89,7 +90,7 @@ def showclock(display):
     display.fill(0)
     printmsg("(thread) Exiting showclock thread ...")
     runflag = False
-    raise myKillException
+#    raise myKillException("Exception in thread")
     sys.exit()
 
 def stop(signum, frame):
@@ -99,16 +100,17 @@ def stop(signum, frame):
     
     signame = signal.Signals(signum).name   # python < 3.8
     print("\r  \n", end="")
-    printmsg(str(signum) + " " + signame)
-    printmsg("Terminate signal sent ...")
-    printmsg("Clearing display ...")
+    printmsg("(signal sent) "+str(signum) + " " + signame +" " + signal.strsignal(signum))
+#    printmsg("Terminate signal sent ...")
+    printmsg("(signal sent) Clearing display ...")
 
     showflag = False
     display.fill(0)
 
     threadflag = False
     runflag = False
-    raise SystemExit    # Raise exception to exit main program
+#    raise KeyboardInterrupt     # Raise exception to exit main program
+    raise myKillException("myKillException raised")
 
 def fmtts(time):
     z = time
@@ -306,13 +308,13 @@ while runflag:
         print("\r  ", end="")
         printmsg("(main) User raised exception Ctrl-C ...")
         printstderr("(main) User pressed Ctrl-c ...")
-
+        
     except SystemExit:
         runflag = False
         threadflag = False
         printmsg("(main) User raised SystemExit ...")
     
-    except myKillException as err:
+    except myKillException:
         runflag = False
         printmsg("(main) thread sends myKillException ...")
         # raise # stops program
