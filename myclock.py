@@ -70,11 +70,9 @@ def showclock(display):
                     display.print(date)
                     time.sleep(0.7)
     
-        # except KeyboardInterrupt:
-        #     signum = 2  # stop signal
-        #     stop(signum, frame)
-        #     threadflag = False
-        #     printstderr("(thread) User pressed Ctrl-c ...")
+        except KeyboardInterrupt:
+            printmsg("(thread) Keyboard Interrupt thrown ...")
+            threadflag = False
 
         except Exception as error:
             printmsg("(thread) Exception thrown ...")
@@ -90,7 +88,6 @@ def showclock(display):
     display.fill(0)
     printmsg("(thread) Exiting showclock thread ...")
     runflag = False
-#    raise myKillException("Exception in thread")
     sys.exit()
 
 def stop(signum, frame):
@@ -101,7 +98,6 @@ def stop(signum, frame):
     signame = signal.Signals(signum).name   # python < 3.8
     print("\r  \n", end="")
     printmsg("(signal sent) "+str(signum) + " " + signame +" " + signal.strsignal(signum))
-#    printmsg("Terminate signal sent ...")
     printmsg("(signal sent) Clearing display ...")
 
     showflag = False
@@ -109,8 +105,7 @@ def stop(signum, frame):
 
     threadflag = False
     runflag = False
-#    raise KeyboardInterrupt     # Raise exception to exit main program
-    raise myKillException("myKillException raised")
+    raise SystemExit     # Raise exception to exit main program
 
 def fmtts(time):
     z = time
@@ -312,11 +307,11 @@ while runflag:
     except SystemExit:
         runflag = False
         threadflag = False
-        printmsg("(main) User raised SystemExit ...")
+        printmsg("(main) SIGINT or SIGTERM raised ...")
     
     except myKillException:
         runflag = False
-        printmsg("(main) thread sends myKillException ...")
+        printmsg("(main) thread sent myKillException ...")
         # raise # stops program
 
     except Exception as error:
