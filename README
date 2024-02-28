@@ -16,3 +16,7 @@
 5. added logging
 
 6. insures showclock thread is terminated
+
+7. Sends email when OS Exception occours
+
+8. Restarts on failure in myclock.service

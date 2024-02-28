@@ -86,7 +86,7 @@ def showclock(display):
     
     printmsg("(thread) Clearing display ...")
     display.fill(0)
-    printmsg("(thread) Exiting showclock thread ...")
+    printmsg("(thread) Exiting showclock thread ...\n")
     runflag = False
     sys.exit()
 
@@ -98,7 +98,7 @@ def stop(signum, frame):
     signame = signal.Signals(signum).name   # python < 3.8
     print("\r  \n", end="")
     printmsg("(signal sent) "+str(signum) + " " + signame +" " + signal.strsignal(signum))
-    printmsg("(signal sent) Clearing display ...")
+    printmsg("(signal sent) Clearing display ...\n")
 
     showflag = False
     display.fill(0)
@@ -165,6 +165,39 @@ def procparmstr(parmstr):
             z = z + tparm[i] + " "
         clparm = z
 
+def sendmail():
+    z=datetime.now()
+    ts = z.strftime("%Y %b %d %H:%M:%S ")
+    hn = os.uname()[1]  # get hostname
+
+    sender = "myclock.py"
+    receiver = "gldrplt@gmail.com"
+    subject = ts + "Program Exception Occurred"
+    msg = ts + "Program myclock.py on server "+hn+" raised Program exception \
+          \n\nrun cat myclock.stderr.log to see details \
+          \n\nmessage sent from myclock.py"
+    
+    newmsg = f"""\
+    
+    From: <myclock.py@{hn}>
+    To: {receiver}
+    Subject: {subject}
+
+    Program: myclock.py
+    On server: {hn}
+
+    raised OS Exception
+
+    use cat myclock.stderr.log to see details
+    
+    message sent from myclock.py"""
+
+    msg = newmsg
+
+    sendemail.sendmail(sender, receiver, subject, msg)    
+    printmsg("(main) Program exception email sent ...\n")
+    pass
+
 ###################################    
 #   Start of Program
 ###################################
@@ -180,6 +213,7 @@ from adafruit_ht16k33 import segments
 import board
 import busio
 import mc_Functions as mcf
+import sendemail
 
 dateflag = False     # show clock and date flag
 
@@ -319,6 +353,7 @@ while runflag:
         threadflag = False
         printmsg("(main) Exception thrown ...")
         printmsg("(main) Exception Name = " + type(error).__name__)
+        sendmail()      # send email
         raise
 
     finally:
@@ -327,5 +362,5 @@ while runflag:
 printmsg("(main) Clearing display ...\n")
 # clear display
 display.fill(0)
-
+sendmail()
 printmsg("(main) Exiting myclock.py ...\n")

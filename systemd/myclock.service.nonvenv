@@ -6,8 +6,13 @@ DefaultDependencies=no
 
 [Service]
 Type=simple
+Restart=on-failure
+RestartSec=5
+
 # set User to find locally installed python modules
 User=pi
+
+# run commands before starting service
 ExecStartPre=-cp -b /home/pi/myprojects/myclock/myclock.stdout.log \
 		/home/pi/myprojects/myclock/myclock.stdout.old
 
@@ -17,6 +22,7 @@ ExecStartPre=-cp -b /home/pi/myprojects/myclock/myclock.stderr.log \
 ExecStartPre=-rm /home/pi/myprojects/myclock/myclock.stdout.log
 ExecStartPre=-rm /home/pi/myprojects/myclock/myclock.stderr.log
 
+# Start service
 # ExecStart for non virtual env
 ExecStart=/usr/bin/python -u\
 	 /home/pi/myprojects/myclock/myclock.py -b 0 
@@ -27,8 +33,8 @@ ExecStart=/usr/bin/python -u\
 
 StandardOutput=file:/home/pi/myprojects/myclock/myclock.stdout.log
 StandardError=file:/home/pi/myprojects/myclock/myclock.stderr.log
-#Restart=always
-#RestartSec=1s
+
+
 
 [Install]
 WantedBy=multi-user.target
