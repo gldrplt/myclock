@@ -77,6 +77,7 @@ def showclock(display):
         except Exception as error:
             printmsg("(thread) Exception thrown ...")
             printmsg("(thread) Exception name = "+type(error).__name__)
+            sendmail()
             signal.raise_signal(signal.SIGTERM)
             threadflag = False
             raise
@@ -189,7 +190,7 @@ def sendmail():
     raised OS Exception
 
     use cat myclock.stderr.log to see details
-    
+
     message sent from myclock.py"""
 
     msg = newmsg
@@ -255,6 +256,10 @@ logfile = path + "/myclock.log"
 logdays = 5
 splitstr = "Launching"
 mcf.trimlog(logfile, logdays, splitstr)
+
+# get PID
+# pid=os.getpid()
+# print("Starting myclock.py - PID = ", pid)
 
 # print start message to stdout
 msg = "Launching 4 digit 7 segment display\n"
@@ -362,5 +367,4 @@ while runflag:
 printmsg("(main) Clearing display ...\n")
 # clear display
 display.fill(0)
-sendmail()
 printmsg("(main) Exiting myclock.py ...\n")
