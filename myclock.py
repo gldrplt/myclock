@@ -74,6 +74,11 @@ def showclock(display):
             printmsg("(thread) Keyboard Interrupt thrown ...")
             threadflag = False
 
+        except SystemExit:
+            runflag = False
+            threadflag = False
+            printmsg("(thread) SIGINT or SIGTERM raised ...")
+
         except Exception as error:
             printmsg("(thread) Exception thrown ...")
             printmsg("(thread) Exception name = "+type(error).__name__)
