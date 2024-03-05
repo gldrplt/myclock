@@ -375,5 +375,5 @@ while runflag:
 printmsg("(main) Clearing display ...\n")
 # clear display
 display.fill(0)
-raise KeyboardInterrupt
+signal.raise_signal(signal.SIGINT)
 printmsg("(main) Exiting myclock.py ...\n")
