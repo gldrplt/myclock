@@ -15,15 +15,16 @@
 #########################################################
 
 # define user-defined exception
-class myKillException(Exception):
-    pass
+def myKillException(exception, message):
+    return exception(message)
 
 def showclock(display):
     global threadflag
     global runflag
 
+    printmsg("Starting thread\n")
+    
     while threadflag:
-        
         # build month/year for display of date
         date = datetime.now().strftime("%m%d")
         colontime = time.time() - 0.5
@@ -76,16 +77,16 @@ def showclock(display):
 
         except SystemExit:
             runflag = False
-            threadflag = False
-            printmsg("(thread) SIGINT or SIGTERM raised ...")
+        #    threadflag = False
+            printmsg("(thread) System Exit raised ...")
 
         except Exception as error:
             printmsg("(thread) Exception thrown ...")
             printmsg("(thread) Exception name = "+type(error).__name__)
-            sendmail()
-            signal.raise_signal(signal.SIGTERM)
+#            sendmail()
+#            signal.raise_signal(signal.SIGTERM)
             threadflag = False
-            raise
+#            raise
 
         finally:
             pass
@@ -224,7 +225,7 @@ import sendemail
 dateflag = False     # show clock and date flag
 
 # Set signal handler for SIGTERM
-signal.signal(signal.SIGINT, stop)
+# signal.signal(signal.SIGINT, stop)
 signal.signal(signal.SIGTERM, stop)
 
 # Create the I2C interface.
@@ -263,8 +264,8 @@ splitstr = "Launching"
 mcf.trimlog(logfile, logdays, splitstr)
 
 # get PID
-# pid=os.getpid()
-# print("Starting myclock.py - PID = ", pid)
+pid=os.getpid()
+print("Starting myclock.py - PID = ", pid)
 
 # print start message to stdout
 msg = "Launching 4 digit 7 segment display\n"
@@ -306,8 +307,10 @@ while runflag:
 
             if parm == "-k":
                 printmsg("(main) ... kill display ...")
-                showflag = False
-                raise KeyboardInterrupt("User sent kill display ...")
+#                showflag = False
+                raise SystemExit
+#                signal.raise_signal(signal.SIGSTOP)
+#                raise KeyboardInterrupt("User sent kill display ...")
 
             if parm == "-s":
                 printmsg("(main) ... blanking display ...")
@@ -351,19 +354,19 @@ while runflag:
     except SystemExit:
         runflag = False
         threadflag = False
-        printmsg("(main) SIGINT or SIGTERM raised ...")
+        printmsg("(main) SystemExit raised ...")
     
-    except myKillException:
-        runflag = False
-        printmsg("(main) thread sent myKillException ...")
-        # raise # stops program
+    # except myKillException:
+    #     runflag = False
+    #     printmsg("(main) thread sent myKillException ...")
+    #     # raise # stops program
 
     except Exception as error:
         runflag = False
         threadflag = False
         printmsg("(main) Exception thrown ...")
         printmsg("(main) Exception Name = " + type(error).__name__)
-        sendmail()      # send email
+#        sendmail()      # send email
         raise
 
     finally:
@@ -372,4 +375,5 @@ while runflag:
 printmsg("(main) Clearing display ...\n")
 # clear display
 display.fill(0)
+raise KeyboardInterrupt
 printmsg("(main) Exiting myclock.py ...\n")
