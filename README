@@ -1,6 +1,8 @@
 ############################################
 #
-#	myclock project v2.0
+#	myclock project v3.0
+#
+#	March 6, 2024
 #
 ############################################
 
@@ -20,3 +22,5 @@
 7. Sends email when OS Exception occours
 
 8. Restarts on failure in myclock.service
+
+9. Use traceback to send exception to stderr

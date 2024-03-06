@@ -21,81 +21,90 @@ def myKillException(exception, message):
 def showclock(display):
     global threadflag
     global runflag
+    global errorname
+    global myrc
 
     printmsg("Starting thread\n")
     
-    while threadflag:
-        # build month/year for display of date
-        date = datetime.now().strftime("%m%d")
-        colontime = time.time() - 0.5
+    try:
+        while threadflag:
+            # build month/year for display of date
+            date = datetime.now().strftime("%m%d")
+            colontime = time.time() - 0.5
 
-        try:
-            while showflag:
-                # loop 3 times to show time
-                for i in range(3):
-                    
-                    # test showflag
-                    if not showflag:
-                        display.fill(0)
-                        break
+            try:
+                while showflag:
+                    # loop 3 times to show time
+                    for i in range(3):
+                        
+                        # test showflag
+                        if not showflag:
+                            display.fill(0)
+                            break
 
-                    # get system time
-                    now = datetime.now()
-                    hour = now.hour
-                    if hour == 0:                       # if hour = 0 change to 12
-                        hour = 12
-                    if hour >12 and milflag == False:    # convert to 12hr time
-                        hour = hour - 12
-                    minute = now.minute
-                    second = now.second
-                    # setup HH:MM for display and print it
-                    clock = '%2d%02d' % (hour,minute)   # concat hour + minute
-                                                        # add leading zero to minute
+                        # get system time
+                        now = datetime.now()
+                        hour = now.hour
+                        if hour == 0:                       # if hour = 0 change to 12
+                            hour = 12
+                        if hour >12 and milflag == False:    # convert to 12hr time
+                            hour = hour - 12
+                        minute = now.minute
+                        second = now.second
+                        # setup HH:MM for display and print it
+                        clock = '%2d%02d' % (hour,minute)   # concat hour + minute
+                                                            # add leading zero to minute
 
-                    # display               
-                    display.print(clock)
-                            
-                    # Toggle colon when displaying time
-                    t = time.time()
-                    dur = t - colontime
-                    if dur >= .8:
-                        display.print(":")      # show colon
-                        colontime = time.time() # reset colon time
-                    else:
-                        display.print(";")  # blank colon
-    
-                    time.sleep(0.7)
+                        # display               
+                        display.print(clock)
+                                
+                        # Toggle colon when displaying time
+                        t = time.time()
+                        dur = t - colontime
+                        if dur >= .8:
+                            display.print(":")      # show colon
+                            colontime = time.time() # reset colon time
+                        else:
+                            display.print(";")  # blank colon
+        
+                        time.sleep(0.7)
 
-                if dateflag:
-                    display.print(";")
-                    display.print(date)
-                    time.sleep(0.7)
-    
-        except KeyboardInterrupt:
-            printmsg("(thread) Keyboard Interrupt thrown ...")
-            threadflag = False
+                    if dateflag:
+                        display.print(";")
+                        display.print(date)
+                        time.sleep(0.7)
+        
+            except KeyboardInterrupt:
+                printmsg("(thread) Keyboard Interrupt thrown ...")
+                threadflag = False
 
-        except SystemExit:
-            runflag = False
-        #    threadflag = False
-            printmsg("(thread) System Exit raised ...")
+            except SystemExit:
+                runflag = False
+                threadflag = False
+                printmsg("(thread) System Exit raised ...")
 
-        except Exception as error:
-            printmsg("(thread) Exception thrown ...")
-            printmsg("(thread) Exception name = "+type(error).__name__)
-#            sendmail()
-#            signal.raise_signal(signal.SIGTERM)
-            threadflag = False
-#            raise
+            except Exception as error:
+                myrc = 2    
+                errorname = type(error).__name__
+                printmsg("(thread) Exception thrown ...")
+                printmsg("(thread) Exception name = "+type(error).__name__)
+                sendmail()
+                z=datetime.now()
+                ts = z.strftime("%Y %b %d %H:%M:%S ")
+                print(ts + "Trace from (thread) ...\n", file=sys.stderr)
+                import traceback
+                traceback.print_exc()   # send trace to stderr
+                threadflag = False
 
-        finally:
-            pass
-    
+            finally:
+                pass
+    except:
+        pass
+
     printmsg("(thread) Clearing display ...")
     display.fill(0)
     printmsg("(thread) Exiting showclock thread ...\n")
     runflag = False
-    sys.exit()
 
 def stop(signum, frame):
     global showflag
@@ -112,7 +121,7 @@ def stop(signum, frame):
 
     threadflag = False
     runflag = False
-    raise SystemExit     # Raise exception to exit main program
+#    raise SystemExit     # Raise exception to exit main program
 
 def fmtts(time):
     z = time
@@ -193,7 +202,7 @@ def sendmail():
     Program: myclock.py
     On server: {hn}
 
-    raised OS Exception
+    raised OS Exception - {errorname}
 
     use cat myclock.stderr.log to see details
 
@@ -223,6 +232,13 @@ import mc_Functions as mcf
 import sendemail
 
 dateflag = False     # show clock and date flag
+logdateflag = False
+myrc = 0
+
+# get path of this program
+path = os.path.dirname(os.path.abspath(__file__))
+pipefile = path + "/clockpipe"
+logfile = path + "/myclock.log"
 
 # Set signal handler for SIGTERM
 # signal.signal(signal.SIGINT, stop)
@@ -249,14 +265,8 @@ t1.start()
 
 # process command line parameters if passed
 # look for --date or --nodate
-logdateflag = False
 clparm = sys.argv[1:]
 procparmstr(clparm)
-
-# get path of this program
-path = os.path.dirname(os.path.abspath(__file__))
-pipefile = path + "/clockpipe"
-logfile = path + "/myclock.log"
 
 # trim log file to 4 days
 logdays = 5
@@ -276,7 +286,7 @@ while runflag:
     try:
         while True:
             if clparm == "":
-                printmsg("(main) waiting for message event\n")
+                printmsg("(main) ... waiting for message event\n")
                 f = open(pipefile, "r")     # read from clockpipe
                                             # system will block until other end
                                             # is connected
@@ -308,7 +318,7 @@ while runflag:
             if parm == "-k":
                 printmsg("(main) ... kill display ...")
 #                showflag = False
-                raise SystemExit
+                raise Exception
 #                signal.raise_signal(signal.SIGSTOP)
 #                raise KeyboardInterrupt("User sent kill display ...")
 
@@ -354,6 +364,7 @@ while runflag:
     except SystemExit:
         runflag = False
         threadflag = False
+        showflag = False
         printmsg("(main) SystemExit raised ...")
     
     # except myKillException:
@@ -362,18 +373,26 @@ while runflag:
     #     # raise # stops program
 
     except Exception as error:
+        myrc = 1    # set returncode
         runflag = False
         threadflag = False
+        errorname = type(error).__name__
         printmsg("(main) Exception thrown ...")
         printmsg("(main) Exception Name = " + type(error).__name__)
-#        sendmail()      # send email
-        raise
+        sendmail()      # send email
+        z=datetime.now()
+        ts = z.strftime("%Y %b %d %H:%M:%S ")
+        print(ts + "Trace from (main) ...\n", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
 
     finally:
         pass
 
 printmsg("(main) Clearing display ...\n")
+
 # clear display
 display.fill(0)
-signal.raise_signal(signal.SIGINT)
+
 printmsg("(main) Exiting myclock.py ...\n")
+exit(myrc)
