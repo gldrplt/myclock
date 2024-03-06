@@ -105,6 +105,7 @@ def showclock(display):
     display.fill(0)
     printmsg("(thread) Exiting showclock thread ...\n")
     runflag = False
+    raise SystemExit        # raise error to stop main program
 
 def stop(signum, frame):
     global showflag
@@ -316,9 +317,8 @@ while runflag:
                 milflag = False
 
             if parm == "-k":
-                printmsg("(main) ... kill display ...")
-#                showflag = False
-                raise Exception
+                printmsg("(main) ... kill myclock.py ...")
+                raise SystemExit
 #                signal.raise_signal(signal.SIGSTOP)
 #                raise KeyboardInterrupt("User sent kill display ...")
 
