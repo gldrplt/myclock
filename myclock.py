@@ -18,14 +18,14 @@
 def myKillException(exception, message):
     return exception(message)
 
-def showclock(display):
+def showclock(display, threadevent):
     global threadflag
     global runflag
     global errorname
     global myrc
 
-    printmsg("Starting thread\n")
-    
+    printmsg("(thread) ... showclock starting\n")
+    threadevent.set()   # set thread started event    
     try:
         while threadflag:
             # build month/year for display of date
@@ -86,8 +86,8 @@ def showclock(display):
             except Exception as error:
                 myrc = 2    
                 errorname = type(error).__name__
-                printmsg("(thread) Exception thrown ...")
-                printmsg("(thread) Exception name = "+type(error).__name__)
+                printmsg("(thread) Exception thrown ...", 'bred')
+                printmsg("(thread) Exception name = "+type(error).__name__, 'bred')
                 sendmail()
                 z=datetime.now()
                 ts = z.strftime("%Y %b %d %H:%M:%S ")
@@ -103,7 +103,7 @@ def showclock(display):
 
     printmsg("(thread) Clearing display ...")
     display.fill(0)
-    printmsg("(thread) Exiting showclock thread ...\n")
+    printmsg("(thread) Exiting showclock thread ...\n", 'bwhite')
     runflag = False
     raise SystemExit        # raise error to stop main program
 
@@ -132,7 +132,7 @@ def fmtts(time):
     ts = hms + ms
     return ts
 
-def printmsg(msg):
+def printmsg(msg, color = None):
     z = datetime.now()                          # get current time
     if "Launching" in msg:
         ts = z.strftime("%Y %b %d %H:%M:%S ")   # format time stamp for Launch msg
@@ -142,9 +142,11 @@ def printmsg(msg):
         else:
             ts = z.strftime("\t    %H:%M:%S ")       # don't show date
     
-    print(ts + msg)                             # print msg to stdout
+    msg = cs.colorstring(color, ts + msg)
+
+    print(msg)                             # print msg to stdout
     
-    x = ts + msg + "\n"                         # add new line symbol to msg
+    x = msg + "\n"                         # add new line symbol to msg
     f = open(logfile, "a")                      # write msg to log file
     f.write(x)
     f.close()
@@ -212,7 +214,7 @@ def sendmail():
     msg = newmsg
 
     sendemail.sendmail(sender, receiver, subject, msg)    
-    printmsg("(main) Program exception email sent ...\n")
+    printmsg("(main) Program exception email sent ...\n", 'byellow')
     pass
 
 ###################################    
@@ -230,11 +232,13 @@ from adafruit_ht16k33 import segments
 import board
 import busio
 import mc_Functions as mcf
+import colorstring as cs
 import sendemail
 
 dateflag = False     # show clock and date flag
 logdateflag = False
 myrc = 0
+threadevent = Event()   # flag to wait for showclock thread
 
 # get path of this program
 path = os.path.dirname(os.path.abspath(__file__))
@@ -255,15 +259,6 @@ display = segments.Seg7x4(i2c)
 # clear display
 display.fill(0)
 
-#   start clock thread
-threadflag = True   # thread flag
-milflag = False     # show 12 hour time
-showflag = True     # tell thread to show display
-runflag = True      # main program run flag
-
-t1 = Thread(target = showclock, args = (display,), daemon=True)
-t1.start()
-
 # process command line parameters if passed
 # look for --date or --nodate
 clparm = sys.argv[1:]
@@ -275,12 +270,22 @@ splitstr = "Launching"
 mcf.trimlog(logfile, logdays, splitstr)
 
 # get PID
-pid=os.getpid()
-print("Starting myclock.py - PID = ", pid)
+# pid=os.getpid()
+# print("Starting myclock.py - PID = ", pid)
 
 # print start message to stdout
 msg = "Launching 4 digit 7 segment display\n"
-printmsg(msg)
+printmsg(msg, 'bwhite')
+
+#   start clock thread
+threadflag = True   # thread flag
+milflag = False     # show 12 hour time
+showflag = True     # tell thread to show display
+runflag = True      # main program run flag
+
+t1 = Thread(target = showclock, args = (display, threadevent,), daemon=True)
+t1.start()
+threadevent.wait()
 
 # main loop
 while runflag:
@@ -359,7 +364,7 @@ while runflag:
         threadflag = False
         print("\r  ", end="")
         printmsg("(main) User raised exception Ctrl-C ...")
-        printstderr("(main) User pressed Ctrl-c ...")
+        printstderr("(stderr) User pressed Ctrl-c ...")
         
     except SystemExit:
         runflag = False
@@ -391,8 +396,11 @@ while runflag:
 
 printmsg("(main) Clearing display ...\n")
 
+#time.sleep(4)
+#t1.join()   # wait for thread to finish
+
 # clear display
 display.fill(0)
 
-printmsg("(main) Exiting myclock.py ...\n")
+printmsg("(main) Exiting myclock.py ...\n", 'bwhite')
 exit(myrc)
