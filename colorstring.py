@@ -17,17 +17,17 @@ class colors:
 def colorstring(color, msg):
 	
     cs = ''
-    match color:
-        case 'bred':
-            cs = colors.bred
-        case 'bwhite':
-            cs = colors.bwhite
-        case 'byellow':
-            cs = colors.byellow
-        case 'bgreen':
-            cs = colors.bgreen
-        case _:
-            return msg
+    
+    if color == 'bred':
+        cs = colors.bred
+    elif color ==  'bwhite':
+        cs = colors.bwhite
+    elif color ==  'byellow':
+        cs = colors.byellow
+    elif color ==  'bgreen':
+        cs = colors.bgreen
+    else:
+        return msg
     
     x = cs + msg +colors.reset
     return x

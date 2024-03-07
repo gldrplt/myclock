@@ -396,8 +396,8 @@ while runflag:
 
 printmsg("(main) Clearing display ...\n")
 
-#time.sleep(4)
-#t1.join()   # wait for thread to finish
+# time.sleep(4)
+# t1.join()   # wait for thread to finish
 
 # clear display
 display.fill(0)
