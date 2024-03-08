@@ -3,6 +3,8 @@ Description=Start myclock service
 Requires=gw_log.service
 After=gw_log.service
 DefaultDependencies=no
+StartLimitIntervalSec=30
+StartLimitBurst=5
 
 [Service]
 Type=simple

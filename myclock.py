@@ -124,6 +124,10 @@ def stop(signum, frame):
     runflag = False
 #    raise SystemExit     # Raise exception to exit main program
 
+def abort(signum, frame):
+    raise Exception
+    
+
 def fmtts(time):
     z = time
     hms = z.strftime("%H:%M:%S")    # hours:min:sec
@@ -248,6 +252,7 @@ logfile = path + "/myclock.log"
 # Set signal handler for SIGTERM
 # signal.signal(signal.SIGINT, stop)
 signal.signal(signal.SIGTERM, stop)
+signal.signal(signal.SIGABRT, abort)    # test signal to force error
 
 # Create the I2C interface.
 i2c = busio.I2C(board.SCL, board.SDA)

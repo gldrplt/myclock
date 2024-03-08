@@ -2,17 +2,18 @@
 Description=Start myclock service
 #Requires=gw_log.service
 #After=gw_log.service
-DefaultDependencies=no
+#DefaultDependencies=no
+StartLimitIntervalSec=30
+StartLimitBurst=5
 
 [Service]
 Type=simple
 Restart=on-failure
 RestartSec=5
-
 # set User to find locally installed python modules
 User=pi
 
-# Commands to run before starting service
+# Execute commands before starting service
 ExecStartPre=-cp -b /home/pi/myprojects/myclock/myclock.stdout.log \
 		/home/pi/myprojects/myclock/myclock.stdout.old
 
@@ -33,6 +34,7 @@ ExecStart=/home/pi/.virtualenvs/myclock/bin/python -u\
 
 StandardOutput=file:/home/pi/myprojects/myclock/myclock.stdout.log
 StandardError=file:/home/pi/myprojects/myclock/myclock.stderr.log
+
 
 [Install]
 WantedBy=multi-user.target
