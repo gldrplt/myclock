@@ -98,6 +98,7 @@ def showclock(display, threadevent):
 
             finally:
                 pass
+
     except:
         pass
 
@@ -105,7 +106,8 @@ def showclock(display, threadevent):
     display.fill(0)
     printmsg("(thread) Exiting showclock thread ...\n", 'bwhite')
     runflag = False
-    raise SystemExit        # raise error to stop main program
+    os.kill(os.getpid(), signal.SIGUSR1)
+#    signal.raise_signal(signal.SIGUSR1)        # raise signal to stop main program
 
 def stop(signum, frame):
     global showflag
@@ -125,8 +127,8 @@ def stop(signum, frame):
 #    raise SystemExit     # Raise exception to exit main program
 
 def abort(signum, frame):
-    raise Exception
-    
+    printmsg("(thread) Exiting myclock.py ...\n", 'bwhite')
+    exit(myrc)
 
 def fmtts(time):
     z = time
@@ -250,9 +252,9 @@ pipefile = path + "/clockpipe"
 logfile = path + "/myclock.log"
 
 # Set signal handler for SIGTERM
-# signal.signal(signal.SIGINT, stop)
+signal.signal(signal.SIGINT, stop)
 signal.signal(signal.SIGTERM, stop)
-signal.signal(signal.SIGABRT, abort)    # test signal to force error
+signal.signal(signal.SIGUSR1, abort)    # signal to force exit of main program
 
 # Create the I2C interface.
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -281,6 +283,7 @@ mcf.trimlog(logfile, logdays, splitstr)
 # print start message to stdout
 msg = "Launching 4 digit 7 segment display\n"
 printmsg(msg, 'bwhite')
+print("PID = ",os.getpid())
 
 #   start clock thread
 threadflag = True   # thread flag
