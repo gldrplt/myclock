@@ -14,10 +14,6 @@
 #
 #########################################################
 
-# define user-defined exception
-def myKillException(exception, message):
-    return exception(message)
-
 def showclock(display, threadevent):
     global threadflag
     global runflag
@@ -73,7 +69,7 @@ def showclock(display, threadevent):
                         display.print(";")
                         display.print(date)
                         time.sleep(0.7)
-        
+                    
             except KeyboardInterrupt:
                 printmsg("(thread) Keyboard Interrupt thrown ...")
                 threadflag = False
@@ -116,7 +112,7 @@ def stop(signum, frame):
     
     signame = signal.Signals(signum).name   # python < 3.8
     print("\r  \n", end="")
-    printmsg("(signal sent) "+str(signum) + " " + signame +" " + signal.strsignal(signum))
+    printmsg("(signal sent) "+str(signum) + " " + signame +" " + signal.strsignal(signum), 'byellow')
     printmsg("(signal sent) Clearing display ...\n")
 
     showflag = False
@@ -198,11 +194,7 @@ def sendmail():
     sender = "myclock.py"
     receiver = "gldrplt@gmail.com"
     subject = ts + "Program Exception Occurred"
-    msg = ts + "Program myclock.py on server "+hn+" raised Program exception \
-          \n\nrun cat myclock.stderr.log to see details \
-          \n\nmessage sent from myclock.py"
-    
-    newmsg = f"""\
+    msg = f"""\
     
     From: <myclock.py@{hn}>
     To: {receiver}
@@ -217,11 +209,8 @@ def sendmail():
 
     message sent from myclock.py"""
 
-    msg = newmsg
-
     sendemail.sendmail(sender, receiver, subject, msg)    
     printmsg("(main) Program exception email sent ...\n", 'byellow')
-    pass
 
 ###################################    
 #   Start of Program
@@ -332,8 +321,6 @@ while runflag:
             if parm == "-k":
                 printmsg("(main) ... kill myclock.py ...")
                 raise SystemExit
-#                signal.raise_signal(signal.SIGSTOP)
-#                raise KeyboardInterrupt("User sent kill display ...")
 
             if parm == "-s":
                 printmsg("(main) ... blanking display ...")
@@ -378,18 +365,14 @@ while runflag:
         runflag = False
         threadflag = False
         showflag = False
-        printmsg("(main) SystemExit raised ...")
+        printmsg("(main) SystemExit raised ...", 'byellow')
     
-    # except myKillException:
-    #     runflag = False
-    #     printmsg("(main) thread sent myKillException ...")
-    #     # raise # stops program
-
     except Exception as error:
         myrc = 1    # set returncode
         runflag = False
         threadflag = False
         errorname = type(error).__name__
+    
         printmsg("(main) Exception thrown ...")
         printmsg("(main) Exception Name = " + type(error).__name__)
         sendmail()      # send email
@@ -403,9 +386,6 @@ while runflag:
         pass
 
 printmsg("(main) Clearing display ...\n")
-
-# time.sleep(4)
-# t1.join()   # wait for thread to finish
 
 # clear display
 display.fill(0)
