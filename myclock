@@ -12,7 +12,7 @@
 #			+d show time and date
 #			-d show time only
 
-source /home/pi/.bash_functions
+source $HOME/.bash_functions
 
 usage()
 {
