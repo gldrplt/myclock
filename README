@@ -1,8 +1,12 @@
 ############################################
 #
-#	myclock project v3.0
+#	myclock project v4.0
 #
+<<<<<<< HEAD
 #	June 6, 2024
+=======
+#	June 11, 2024
+>>>>>>> dev
 #
 ############################################
 
@@ -26,3 +30,5 @@
 9. Use traceback to send exception to stderr
 
 10. Added colors to log messages
+
+11. Improved use of Event to redisplay clock after -f command
