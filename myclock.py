@@ -14,7 +14,7 @@
 #
 #########################################################
 
-def showclock(display, threadevent):
+def showclock(display, threadevent, msgevent):
     global threadflag
     global runflag
     global errorname
@@ -24,6 +24,8 @@ def showclock(display, threadevent):
     threadevent.set()   # set thread started event    
     try:
         while threadflag:
+            msgevent.wait()    # wait for message
+            msgevent.clear()
             # build month/year for display of date
             date = datetime.now().strftime("%m%d")
             colontime = time.time() - 0.5
@@ -34,9 +36,9 @@ def showclock(display, threadevent):
                     for i in range(3):
                         
                         # test showflag
-                        if not showflag:
-                            display.fill(0)
-                            break
+                        # if not showflag:
+                        #     display.fill(0)
+                        #     break
 
                         # get system time
                         now = datetime.now()
@@ -234,6 +236,7 @@ dateflag = False     # show clock and date flag
 logdateflag = False
 myrc = 0
 threadevent = Event()   # flag to wait for showclock thread
+msgevent = Event()      # flag to indicate message received
 
 # get path of this program
 path = os.path.dirname(os.path.abspath(__file__))
@@ -280,7 +283,7 @@ milflag = False     # show 12 hour time
 showflag = True     # tell thread to show display
 runflag = True      # main program run flag
 
-t1 = Thread(target = showclock, args = (display, threadevent,), daemon=True)
+t1 = Thread(target = showclock, args = (display, threadevent, msgevent), daemon=True)
 t1.start()
 threadevent.wait()
 
@@ -295,6 +298,7 @@ while runflag:
                                             # is connected
                 parm = f.readline()
                 f.close()
+
                 args = parm.split()
                 procparmstr(args)           # process parmstr
                                             # look for --date or --nodate
@@ -333,8 +337,8 @@ while runflag:
 
             if parm =="-f":
                 printmsg("(main) ... fill display ...")
-                display.fill(1)
                 showflag = False
+                display.fill(1)
 
             if parm =="+d":
                 printmsg("(main) ... show time and date ...")
@@ -353,6 +357,8 @@ while runflag:
             if parm == "--date":
                 logdateflag = True
                 printmsg("(main) ... show full date yyyy/mm/dd in log file ...")
+
+            msgevent.set()              # set msgevent
 
     except KeyboardInterrupt:
         runflag = False
