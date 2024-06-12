@@ -1,8 +1,5 @@
 [Unit]
 Description=Start myclock service
-#Requires=gw_log.service
-#After=gw_log.service
-#DefaultDependencies=no
 StartLimitIntervalSec=30
 StartLimitBurst=5
 
@@ -10,31 +7,27 @@ StartLimitBurst=5
 Type=simple
 Restart=on-failure
 RestartSec=5
+
 # set User to find locally installed python modules
-User=pi
+User=paul
 
 # Execute commands before starting service
-ExecStartPre=-cp -b /home/pi/myprojects/myclock/myclock.stdout.log \
-		/home/pi/myprojects/myclock/myclock.stdout.old
-
-ExecStartPre=-cp -b /home/pi/myprojects/myclock/myclock.stderr.log \
-		/home/pi/myprojects/myclock/myclock.stderr.old
-
-ExecStartPre=-rm /home/pi/myprojects/myclock/myclock.stdout.log
-ExecStartPre=-rm /home/pi/myprojects/myclock/myclock.stderr.log
-
-# Start service
-# ExecStart for non virtual env
-#ExecStart=/usr/bin/python -u\
-#	 /home/pi/myprojects/myclock/myclock.py -b 0 
+ExecStartPre=-cp /var/log/myclock.stdout \
+		/var/log/myclock.stdout.old"
+ExecStartPre=-cp /var/log/myclock.stderr \
+		/var/log/myclock.stderr.old"
 
 # ExecStart for virtual env
-ExecStart=/home/pi/.virtualenvs/myclock/bin/python -u\
-	 /home/pi/myprojects/myclock/myclock.py -b 0 
+ExecStart=/bin/bash -c "${HOME}/.virtualenvs/myclock/bin/python -u\
+	 ${HOME}/myprojects/myclock/myclock.py -b 0"
 
-StandardOutput=file:/home/pi/myprojects/myclock/myclock.stdout.log
-StandardError=file:/home/pi/myprojects/myclock/myclock.stderr.log
+# ExecStart for non virtual env
+#ExecStart=/usr/bin/python -u\
+#	 ${HOME}/myprojects/myclock/myclock.py -b 0"
 
+# Define stdout and stderr
+StandardOutput=truncate:/var/log/myclock.stdout
+StandardError=truncate:/var/log/myclock.stderr
 
 [Install]
 WantedBy=multi-user.target
