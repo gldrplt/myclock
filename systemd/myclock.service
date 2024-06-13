@@ -12,10 +12,13 @@ RestartSec=5
 User=paul
 
 # Execute commands before starting service
-ExecStartPre=-cp /var/log/myclock.stdout \
-		/var/log/myclock.stdout.old"
-ExecStartPre=-cp /var/log/myclock.stderr \
-		/var/log/myclock.stderr.old"
+ExecStartPre=-cp -b /home/paul/myprojects/myclock/myclock.stdout \
+		/home/paul/myprojects/myclock/myclock.stdout.old
+ExecStartPre=-cp -b /home/paul/myprojects/myclock/myclock.stderr \
+		/home/paul/myprojects/myclock/myclock.stderr.old
+
+ExecStartPre=-rm /home/pi/myprojects/myclock/myclock.stdout
+ExecStartPre=-rm /home/pi/myprojects/myclock/myclock.stderr
 
 # ExecStart for virtual env
 ExecStart=/bin/bash -c "${HOME}/.virtualenvs/myclock/bin/python -u\
@@ -26,8 +29,8 @@ ExecStart=/bin/bash -c "${HOME}/.virtualenvs/myclock/bin/python -u\
 #	 ${HOME}/myprojects/myclock/myclock.py -b 0"
 
 # Define stdout and stderr
-StandardOutput=truncate:/var/log/myclock.stdout
-StandardError=truncate:/var/log/myclock.stderr
+StandardOutput=file:/home/paul/myprojects/myclock/myclock.stdout
+StandardError=file:/home/paul/myprojects/myclock/myclock.stderr
 
 [Install]
 WantedBy=multi-user.target

@@ -28,3 +28,6 @@
 10. Added colors to log messages
 
 11. Improved use of Event to redisplay clock after -f command
+
+12. Updated myclock.service
+

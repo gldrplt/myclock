@@ -2,6 +2,8 @@
 
 clockpipe
 
+*.stdout
+*.stderr
 *.log
 *.txt
 *.new
