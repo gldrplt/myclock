@@ -311,10 +311,13 @@ while runflag:
             z = parm.split(" ")
 
             if z[0] == "-b":
-                br=float(z[1])
-                printmsg("(main) ... setting display brightness " + z[1])
-                display.brightness = br
-
+                if len(z) == 2:         # check if brightness set
+                    br=float(z[1])
+                    printmsg("(main) ... setting display brightness " + z[1])
+                    display.brightness = br
+                else:
+                    printmsg("(main) ... Invalid display brightness ") # no brightness set
+                    display.brightness = 0
             if parm == "+m" :
                 printmsg("(main) ... display military time ...")
                 milflag = True
