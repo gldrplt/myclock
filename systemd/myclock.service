@@ -29,8 +29,8 @@ ExecStart=/bin/bash -c "${HOME}/.virtualenvs/myclock/bin/python -u\
 #	 ${HOME}/myprojects/myclock/myclock.py -b 0"
 
 # Define stdout and stderr
-StandardOutput=file:/home/paul/myprojects/myclock/myclock.stdout
-StandardError=file:/home/paul/myprojects/myclock/myclock.stderr
+StandardOutput=truncate:/home/paul/myprojects/myclock/myclock.stdout
+StandardError=truncate:/home/paul/myprojects/myclock/myclock.stderr
 
 [Install]
 WantedBy=multi-user.target
