@@ -262,7 +262,11 @@ display.fill(0)
 # look for --date or --nodate
 clparm = sys.argv[1:]
 procparmstr(clparm)
-
+if clparm == "":
+    parm = "-b 0"    # default options
+else:
+    parm = clparm
+    
 # trim log file to 4 days
 logdays = 5
 splitstr = "Launching"
@@ -291,7 +295,7 @@ threadevent.wait()
 while runflag:
     try:
         while True:
-            if clparm == "":
+            if parm == "":
                 printmsg("(main) ... waiting for message event\n")
                 f = open(pipefile, "r")     # read from clockpipe
                                             # system will block until other end
@@ -299,19 +303,11 @@ while runflag:
                 parm = f.readline()
                 f.close()
 
-                args = parm.split()
-                procparmstr(args)           # process parmstr
-                                            # look for --date or --nodate
-                clparm = ""
-            else:
-                parm = clparm
-                clparm = ""
-
             parm = parm.rstrip()        # remove \n if present                
             z = parm.split(" ")
 
             if z[0] == "-b":
-                if len(z) == 2:         # check if brightness set
+                if len(z) == 2 and z[1].isnumeric():   # check if brightness set
                     br=float(z[1])
                     printmsg("(main) ... setting display brightness " + z[1])
                     display.brightness = br
@@ -362,6 +358,8 @@ while runflag:
                 printmsg("(main) ... show full date yyyy/mm/dd in log file ...")
 
             msgevent.set()              # set msgevent
+
+            parm = ""           # clear parm to wait for next message
 
     except KeyboardInterrupt:
         runflag = False

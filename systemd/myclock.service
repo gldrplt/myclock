@@ -17,8 +17,8 @@ ExecStartPre=-cp -b /home/paul/myprojects/myclock/myclock.stdout \
 ExecStartPre=-cp -b /home/paul/myprojects/myclock/myclock.stderr \
 		/home/paul/myprojects/myclock/myclock.stderr.old
 
-ExecStartPre=-rm /home/pi/myprojects/myclock/myclock.stdout
-ExecStartPre=-rm /home/pi/myprojects/myclock/myclock.stderr
+#ExecStartPre=-rm /home/paul/myprojects/myclock/myclock.stdout
+#ExecStartPre=-rm /home/paul/myprojects/myclock/myclock.stderr
 
 # ExecStart for virtual env
 ExecStart=/bin/bash -c "${HOME}/.virtualenvs/myclock/bin/python -u\
