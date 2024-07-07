@@ -12,7 +12,44 @@
 #			+d show time and date
 #			-d show time only
 #
+#           defined child class mysegements
+#
 #########################################################
+import os
+import sys
+import getopt
+import signal
+import time
+from threading import Thread
+from threading import Event
+from datetime import datetime
+from adafruit_ht16k33 import segments
+import board
+import busio
+import mc_Functions as mcf
+import colorstring as cs
+import sendemail
+
+class mysegments(segments.Seg7x4):
+# child class of Seg7x4
+# test showflag to determine if print or fill 
+# operation should occur    
+
+    def __init__(self, i2c):
+        # invoke the init class of segments.Seg7x4
+        super().__init__(i2c)
+    
+    def myfill(self, arg):
+        self.arg = arg
+        if showflag == True:
+            self.fill(self.arg)
+        else:
+            self.fill(0)
+
+    def myprint(self, arg):
+        self.arg = arg
+        if showflag == True:
+            self.print(self.arg)
 
 def showclock(display, threadevent, msgevent):
     global threadflag
@@ -24,6 +61,7 @@ def showclock(display, threadevent, msgevent):
     threadevent.set()   # set thread started event    
     try:
         while threadflag:
+            printmsg("(thread) ... waiting for message event\n")
             msgevent.wait()    # wait for message
             msgevent.clear()
             # build month/year for display of date
@@ -35,11 +73,6 @@ def showclock(display, threadevent, msgevent):
                     # loop 3 times to show time
                     for i in range(3):
                         
-                        # test showflag
-                        # if not showflag:
-                        #     display.fill(0)
-                        #     break
-
                         # get system time
                         now = datetime.now()
                         hour = now.hour
@@ -54,24 +87,25 @@ def showclock(display, threadevent, msgevent):
                                                             # add leading zero to minute
 
                         # display               
-                        display.print(clock)
+                        display.myprint(clock)
                                 
                         # Toggle colon when displaying time
                         t = time.time()
                         dur = t - colontime
                         if dur >= .8:
-                            display.print(":")      # show colon
+                            display.myprint(":")      # show colon
                             colontime = time.time() # reset colon time
                         else:
-                            display.print(";")  # blank colon
+                            display.myprint(";")  # blank colon
         
                         time.sleep(0.7)
 
                     if dateflag:
-                        display.print(";")
-                        display.print(date)
+                        display.myprint(";")
+                        display.myprint(date)
                         time.sleep(0.7)
-                    
+#                print("showclock bottom")    
+
             except KeyboardInterrupt:
                 printmsg("(thread) Keyboard Interrupt thrown ...")
                 threadflag = False
@@ -86,7 +120,8 @@ def showclock(display, threadevent, msgevent):
                 errorname = type(error).__name__
                 printmsg("(thread) Exception thrown ...", 'bred')
                 printmsg("(thread) Exception name = "+type(error).__name__, 'bred')
-                sendmail()
+                if emailflag == True:
+                    sendmail()
                 z=datetime.now()
                 ts = z.strftime("%Y %b %d %H:%M:%S ")
                 print(ts + "Trace from (thread) ...\n", file=sys.stderr)
@@ -104,7 +139,7 @@ def showclock(display, threadevent, msgevent):
     display.fill(0)
     printmsg("(thread) Exiting showclock thread ...\n", 'bwhite')
     runflag = False
-    os.kill(os.getpid(), signal.SIGUSR1)
+#    os.kill(os.getpid(), signal.SIGUSR1)
 #    signal.raise_signal(signal.SIGUSR1)        # raise signal to stop main program
 
 def stop(signum, frame):
@@ -146,7 +181,8 @@ def printmsg(msg, color = None):
         else:
             ts = z.strftime("\t    %H:%M:%S ")       # don't show date
     
-    msg = cs.colorstring(color, ts + msg)
+    if msg != "":
+        msg = cs.colorstring(color, ts + msg)
 
     print(msg)                             # print msg to stdout
     
@@ -164,31 +200,59 @@ def printstderr(msg):   # print to stderr
 def procparmstr(parmstr):
     global clparm
     global logdateflag
+    global emailflag
+
     try:
-        options, remainder = getopt.getopt(parmstr, "", ['date',
-                                                        'nodate'])
+        options, remainder = getopt.getopt(parmstr, "b:smdfk", ['date',
+                                                                'nodate',
+                                                                'email'])
+        tparm = ""
+        pcnt = 0
         for opt, arg in options:
+            if opt in '-b':
+                a = arg
+                tparm = [opt, arg]
+                tparm = opt + " " + arg
+                pcnt += 1
             if opt in ('--date'):
                 logdateflag = True
             elif opt in ('--nodate'):
                 logdateflag = False
-        tparm = remainder      # set clparm to remaing parms
+            elif opt in ('--email'):
+                emailflag = True
+        
+        for p in remainder:
+            tparm = tparm + " " + p
+            pcnt += 1
+        
+        if pcnt > 1:
+            raise Exception("Too many parms in command line ... ")
+        if tparm == "":
+            if len(remainder) > 0:
+                tparm = remainder[0]      # set clparm to remaing parms
 
-    except:
-        tparm = parmstr
+    except getopt.GetoptError as err:
+        printmsg("")
+        msg = "(main) Exception: "+str(err) + "\n"
+        printmsg(msg, 'bred')
+        printmsg("(main) SystemExit raised ...\n", 'byellow')
+        printmsg("(main) Exiting myclock.py ...\n", 'bwhite')
+        raise SystemExit
 
-    if len(tparm) == 0:
-        clparm = ""
-    elif len(tparm) == 1:
-        clparm = tparm[0]
-    elif len(tparm) > 1:
-        n = len(tparm)
-        z = ""
-        for i in range(0,n):
-            z = z + tparm[i] + " "
-        clparm = z
+    except Exception as err:
+        printmsg("")
+        msg = "(main) Exception: "+str(err) + str(parmstr) + "\n"
+        printmsg(msg, 'bred')
+        printmsg("(main) SystemExit raised ...\n", 'byellow')
+        printmsg("(main) Exiting myclock.py ...\n", 'bwhite')
+        raise SystemExit
+    
+    clparm = tparm
 
 def sendmail():
+    if emailflag == False:  # check emailflag
+        return              # exit function if False
+    
     z=datetime.now()
     ts = z.strftime("%Y %b %d %H:%M:%S ")
     hn = os.uname()[1]  # get hostname
@@ -217,23 +281,10 @@ def sendmail():
 ###################################    
 #   Start of Program
 ###################################
-import os
-import sys
-import getopt
-import signal
-import time
-from threading import Thread
-from threading import Event
-from datetime import datetime
-from adafruit_ht16k33 import segments
-import board
-import busio
-import mc_Functions as mcf
-import colorstring as cs
-import sendemail
 
 dateflag = False     # show clock and date flag
 logdateflag = False
+emailflag = False
 myrc = 0
 threadevent = Event()   # flag to wait for showclock thread
 msgevent = Event()      # flag to indicate message received
@@ -253,13 +304,14 @@ i2c = busio.I2C(board.SCL, board.SDA)
 
 # Create the LED segment class.
 # This creates a 7 segment 4 character display:
-display = segments.Seg7x4(i2c)
+#display = segments.Seg7x4(i2c)
+display = mysegments(i2c)    # use subclass mysegments
 
 # clear display
 display.fill(0)
 
 # process command line parameters if passed
-# look for --date or --nodate
+# look for --date or --nodate or --email
 clparm = sys.argv[1:]
 procparmstr(clparm)
 if clparm == "":
@@ -271,10 +323,6 @@ else:
 logdays = 5
 splitstr = "Launching"
 mcf.trimlog(logfile, logdays, splitstr)
-
-# get PID
-# pid=os.getpid()
-# print("Starting myclock.py - PID = ", pid)
 
 # print start message to stdout
 msg = "Launching 4 digit 7 segment display\n"
@@ -314,6 +362,8 @@ while runflag:
                 else:
                     printmsg("(main) ... Invalid display brightness ") # no brightness set
                     display.brightness = 0
+                showflag = True
+
             if parm == "+m" :
                 printmsg("(main) ... display military time ...")
                 milflag = True
@@ -327,8 +377,8 @@ while runflag:
 
             if parm == "-s":
                 printmsg("(main) ... blanking display ...")
-                display.fill(0)
                 showflag = False
+                display.fill(0)
 
             if parm == "+s":
                 printmsg("(main) ... show clock ...")
@@ -338,7 +388,7 @@ while runflag:
                 printmsg("(main) ... fill display ...")
                 showflag = False
                 display.fill(1)
-
+                
             if parm =="+d":
                 printmsg("(main) ... show time and date ...")
                 dateflag = True
@@ -382,7 +432,8 @@ while runflag:
     
         printmsg("(main) Exception thrown ...")
         printmsg("(main) Exception Name = " + type(error).__name__)
-        sendmail()      # send email
+        if emailflag == True:
+            sendmail()      # send email
         z=datetime.now()
         ts = z.strftime("%Y %b %d %H:%M:%S ")
         print(ts + "Trace from (main) ...\n", file=sys.stderr)
@@ -398,4 +449,5 @@ printmsg("(main) Clearing display ...\n")
 display.fill(0)
 
 printmsg("(main) Exiting myclock.py ...\n", 'bwhite')
-exit(myrc)
+sys.exit(myrc)
+# exit(myrc)
