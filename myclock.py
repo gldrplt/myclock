@@ -62,6 +62,7 @@ def showclock(display, threadevent, msgevent):
     try:
         while threadflag:
             printmsg("(thread) ... waiting for message event\n")
+            msgevent.clear()
             msgevent.wait()    # wait for message
             msgevent.clear()
             # build month/year for display of date
@@ -139,8 +140,6 @@ def showclock(display, threadevent, msgevent):
     display.fill(0)
     printmsg("(thread) Exiting showclock thread ...\n", 'bwhite')
     runflag = False
-#    os.kill(os.getpid(), signal.SIGUSR1)
-#    signal.raise_signal(signal.SIGUSR1)        # raise signal to stop main program
 
 def stop(signum, frame):
     global showflag
@@ -159,10 +158,6 @@ def stop(signum, frame):
     runflag = False
 #    raise SystemExit     # Raise exception to exit main program
 
-def abort(signum, frame):
-    printmsg("(thread) Exiting myclock.py ...\n", 'bwhite')
-    exit(myrc)
-
 def fmtts(time):
     z = time
     hms = z.strftime("%H:%M:%S")    # hours:min:sec
@@ -179,7 +174,7 @@ def printmsg(msg, color = None):
         if logdateflag:                             # format time stamp for all other msg
             ts = z.strftime("%Y %b %d %H:%M:%S ")   # show date
         else:
-            ts = z.strftime("\t    %H:%M:%S ")       # don't show date
+            ts = z.strftime("\t    %H:%M:%S:%f ")       # don't show date
     
     if msg != "":
         msg = cs.colorstring(color, ts + msg)
@@ -237,17 +232,17 @@ def procparmstr(parmstr):
         printmsg(msg, 'bred')
         printmsg("(main) SystemExit raised ...\n", 'byellow')
         printmsg("(main) Exiting myclock.py ...\n", 'bwhite')
-        raise SystemExit
-
+        sys.exit(2) # set return code
+        
     except Exception as err:
         printmsg("")
         msg = "(main) Exception: "+str(err) + str(parmstr) + "\n"
         printmsg(msg, 'bred')
         printmsg("(main) SystemExit raised ...\n", 'byellow')
         printmsg("(main) Exiting myclock.py ...\n", 'bwhite')
-        raise SystemExit
+        sys.exit(2)
     
-    clparm = tparm
+    clparm = tparm      # initial parm
 
 def sendmail():
     if emailflag == False:  # check emailflag
@@ -297,7 +292,6 @@ logfile = path + "/myclock.log"
 # Set signal handler for SIGTERM
 signal.signal(signal.SIGINT, stop)
 signal.signal(signal.SIGTERM, stop)
-signal.signal(signal.SIGUSR1, abort)    # signal to force exit of main program
 
 # Create the I2C interface.
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -352,6 +346,8 @@ while runflag:
                 f.close()
 
             parm = parm.rstrip()        # remove \n if present                
+
+            showparm = "[ " + parm + " ]"
             z = parm.split(" ")
 
             if z[0] == "-b":
@@ -372,30 +368,30 @@ while runflag:
                 milflag = False
 
             if parm == "-k":
-                printmsg("(main) ... kill myclock.py ...")
+                printmsg("(main) ... kill myclock.py ... " + showparm)
                 raise SystemExit
 
             if parm == "-s":
-                printmsg("(main) ... blanking display ...")
+                printmsg("(main) ... blanking display ... " + showparm)
                 showflag = False
                 display.fill(0)
 
             if parm == "+s":
-                printmsg("(main) ... show clock ...")
+                printmsg("(main) ... show clock ... " + showparm)
                 showflag = True
 
             if parm =="-f":
-                printmsg("(main) ... fill display ...")
+                printmsg("(main) ... fill display ... " + showparm)
                 showflag = False
                 display.fill(1)
                 
             if parm =="+d":
-                printmsg("(main) ... show time and date ...")
+                printmsg("(main) ... show time and date ... " + showparm)
                 dateflag = True
                 showflag = True
             
             if parm =="-d":
-                printmsg("(main) ... show time only ...")
+                printmsg("(main) ... show time only ... " + showparm)
                 dateflag = False
                 showflag = True
 
@@ -422,6 +418,7 @@ while runflag:
         runflag = False
         threadflag = False
         showflag = False
+        printmsg("")
         printmsg("(main) SystemExit raised ...", 'byellow')
     
     except Exception as error:

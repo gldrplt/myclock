@@ -90,7 +90,19 @@ if [[ $isrunning == "" ]] && [[ $1 != "-k" ]]; then
 	msgsent="y"	# set message sent
 	echo -e $prompt"Launching 4 digit 7 segment clock\n"
 	cd $pgmpath
-	python myclock.py $@  >/dev/null 2>&1 &
+	python myclock.py $@  1>myclock.stdout.sh 2>myclock.stderr.sh &
+	sleep 1
+	# test if successful
+	isrunning=$(ps axg | grep myclock.py | grep -v grep)
+	if [[ $isrunning == "" ]]; then
+		msg=$(fred "myclock.py failed to start ...")
+		echo -e "\n"$prompt$msg
+		msg=$(fred "check myclock.stdout.sh and myclock.stderr.sh ...")
+		echo -e "\n"$prompt$msg
+		msg=$(fred "Exiting script ...\n")
+		echo -e "\n"$prompt$msg
+		exit 2
+	fi
 	isrunning="t"
 fi
 
