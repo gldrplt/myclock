@@ -11,6 +11,9 @@ RestartSec=5
 # set User to find locally installed python modules
 User=paul
 
+# signal to kill myclock
+KillSignal=SIGTERM
+
 # Execute commands before starting service
 ExecStartPre=-cp -b /home/paul/myprojects/myclock/myclock.stdout \
 		/home/paul/myprojects/myclock/myclock.stdout.old

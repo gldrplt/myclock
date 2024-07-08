@@ -156,7 +156,7 @@ def stop(signum, frame):
 
     threadflag = False
     runflag = False
-#    raise SystemExit     # Raise exception to exit main program
+    raise SystemExit     # Raise exception to exit main program
 
 def fmtts(time):
     z = time
