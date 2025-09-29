@@ -1,8 +1,8 @@
 ############################################
 #
-#	myclock project v4.0
+#	myclock project v5.0
 #
-#	June 11, 2024
+#	September 29, 2025
 #
 ############################################
 
@@ -31,4 +31,7 @@
 
 12. Updated myclock.service
 
-13. Defined child class mysegments to control display output
+13. Defined child class mysegments to control display 
+
+14. Cleaned up myclock.py to show correct month/day
+

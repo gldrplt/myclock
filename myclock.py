@@ -1,6 +1,6 @@
 #########################################################
 #
-#   myclock.py
+#   myclock.py v2.0
 #
 #	options	-s blank clock display
 #			+s show clock
@@ -66,28 +66,24 @@ def showclock(display, threadevent, msgevent):
             msgevent.wait()    # wait for message
             msgevent.clear()
             # build month/year for display of date
-            date = datetime.now().strftime("%m%d")
+            # date = datetime.now().strftime("%m%d")
             colontime = time.time() - 0.5
 
             try:
                 while showflag:
                     # loop 3 times to show time
                     for i in range(3):
-                        
-                        # get system time
+                        # get system time and date
                         now = datetime.now()
-                        hour = now.hour
-                        if hour == 0:                       # if hour = 0 change to 12
-                            hour = 12
-                        if hour >12 and milflag == False:    # convert to 12hr time
-                            hour = hour - 12
-                        minute = now.minute
-                        second = now.second
-                        # setup HH:MM for display and print it
-                        clock = '%2d%02d' % (hour,minute)   # concat hour + minute
-                                                            # add leading zero to minute
+                        # format month/year for display of date
+                        date = now.strftime("%m%d")
+                        # format time
+                        if milflag == False:
+                            clock = now.strftime("%I%M")    # HH:MM 12h
+                        else:
+                            clock = now.strftime("%H%M")    # HH:MM 24h
 
-                        # display               
+                        # display time hh:mm               
                         display.myprint(clock)
                                 
                         # Toggle colon when displaying time
@@ -101,11 +97,11 @@ def showclock(display, threadevent, msgevent):
         
                         time.sleep(0.7)
 
+                    # if dateflag display date
                     if dateflag:
                         display.myprint(";")
                         display.myprint(date)
                         time.sleep(0.7)
-#                print("showclock bottom")    
 
             except KeyboardInterrupt:
                 printmsg("(thread) Keyboard Interrupt thrown ...")
@@ -169,7 +165,7 @@ def fmtts(time):
 def printmsg(msg, color = None):
     z = datetime.now()                          # get current time
     if "Launching" in msg:
-        ts = z.strftime("%Y %b %d %H:%M:%S ")   # format time stamp for Launch msg
+        ts = z.strftime("\n%Y %b %d %H:%M:%S ")   # format time stamp for Launch msg
     else:
         if logdateflag:                             # format time stamp for all other msg
             ts = z.strftime("%Y %b %d %H:%M:%S ")   # show date
@@ -319,7 +315,7 @@ splitstr = "Launching"
 mcf.trimlog(logfile, logdays, splitstr)
 
 # print start message to stdout
-msg = "Launching 4 digit 7 segment display\n"
+msg = "Launching 4 digit 7 segment display"
 printmsg(msg, 'bwhite')
 print("PID = ",os.getpid())
 
