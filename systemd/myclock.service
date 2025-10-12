@@ -16,26 +16,28 @@ User=paul
 # signal to kill myclock
 KillSignal=SIGTERM
 
+WorkingDirectory=/home/paul/myprojects/myclock
+
+# Set PATH for virtual environment
+Environment="PATH=/home/paul/.virtualenvs/myclock/bin:/home/paul/bin"
+
 # Execute commands before starting service
 ExecStartPre=-cp -b /home/paul/myprojects/myclock/myclock.stdout \
 		/home/paul/myprojects/myclock/myclock.stdout.old
 ExecStartPre=-cp -b /home/paul/myprojects/myclock/myclock.stderr \
 		/home/paul/myprojects/myclock/myclock.stderr.old
-
-#ExecStartPre=-rm /home/paul/myprojects/myclock/myclock.stdout
-#ExecStartPre=-rm /home/paul/myprojects/myclock/myclock.stderr
+ExecStartPre=rm myclock.stdout
+ExecStartPre=rm myclock.stderr
 
 # ExecStart for virtual env
-ExecStart=/bin/bash -c "${HOME}/.virtualenvs/myclock/bin/python -u\
-	 ${HOME}/myprojects/myclock/myclock.py -b 0"
+ExecStart=python -u myclock.py -b 0
 
 # ExecStart for non virtual env
 #ExecStart=/usr/bin/python -u\
-#	 ${HOME}/myprojects/myclock/myclock.py -b 0"
 
 # Define stdout and stderr
-StandardOutput=truncate:/home/paul/myprojects/myclock/myclock.stdout
-StandardError=truncate:/home/paul/myprojects/myclock/myclock.stderr
+StandardOutput=file:/home/paul/myprojects/myclock/myclock.stdout
+StandardError=file:/home/paul/myprojects/myclock/myclock.stderr
 
 [Install]
 WantedBy=multi-user.target
