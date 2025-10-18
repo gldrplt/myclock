@@ -1,10 +1,18 @@
 ############################################
 #
-#	myclock project v5.0
+#	myclock project v1.2
 #
-#	September 29, 2025
+#	October 18, 2025
 #
 ############################################
+
+Change Log
+
+2025-10-18
+	Modified myclock.service file to wait until
+	time server syncs system clock
+	Added myclockwaiting service to show blinking 
+	colon until myclock.service starts
 
 1. Launched 4 digit 7 segment clock
 

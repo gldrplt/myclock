@@ -1,41 +1,29 @@
 [Unit]
 Description=Start myclock service
-StartLimitIntervalSec=30
-StartLimitBurst=5
 After=network-online.target time-sync.target
 Wants=network-online.target time-sync.target
+Conflicts=myclockwaiting.service
 
 [Service]
 Type=simple
 Restart=on-failure
 RestartSec=5
-
-# set User to find locally installed python modules
 User=paul
-
-# signal to kill myclock
 KillSignal=SIGTERM
-
 WorkingDirectory=/home/paul/myprojects/myclock
+Environment="PATH=/home/paul/.virtualenvs/myclock/bin:/usr/local/bin:/usr/bin:/bin"
 
-# Set PATH for virtual environment
-Environment="PATH=/home/paul/.virtualenvs/myclock/bin:/home/paul/bin"
+ExecStartPre=-/bin/cp -b /home/paul/myprojects/myclock/myclock.stdout \
+        /home/paul/myprojects/myclock/myclock.stdout.old
+ExecStartPre=-/bin/cp -b /home/paul/myprojects/myclock/myclock.stderr \
+        /home/paul/myprojects/myclock/myclock.stderr.old
+ExecStartPre=-/bin/rm -f /home/paul/myprojects/myclock/myclock.stdout
+ExecStartPre=-/bin/rm -f /home/paul/myprojects/myclock/myclock.stderr
 
-# Execute commands before starting service
-ExecStartPre=-cp -b /home/paul/myprojects/myclock/myclock.stdout \
-		/home/paul/myprojects/myclock/myclock.stdout.old
-ExecStartPre=-cp -b /home/paul/myprojects/myclock/myclock.stderr \
-		/home/paul/myprojects/myclock/myclock.stderr.old
-ExecStartPre=rm myclock.stdout
-ExecStartPre=rm myclock.stderr
+#ExecStartPre=/bin/systemctl stop -- no-block myclockwaiting
 
-# ExecStart for virtual env
-ExecStart=python -u myclock.py -b 0
+ExecStart=/home/paul/.virtualenvs/myclock/bin/python -u /home/paul/myprojects/myclock/myclock.py -b 0
 
-# ExecStart for non virtual env
-#ExecStart=/usr/bin/python -u\
-
-# Define stdout and stderr
 StandardOutput=file:/home/paul/myprojects/myclock/myclock.stdout
 StandardError=file:/home/paul/myprojects/myclock/myclock.stderr
 
