@@ -1,31 +1,29 @@
 [Unit]
 Description=Start myclock service
-After=network-online.target time-sync.target
-Wants=network-online.target time-sync.target
-Conflicts=myclockwaiting.service
+After=myclockwaiting.service network-online.target time-sync.target
+Wants=myclockwaiting.service network-online.target time-sync.target
+# Conflicts=myclockwaiting.service
 
 [Service]
 Type=simple
 Restart=on-failure
 RestartSec=5
-User=paul
 KillSignal=SIGTERM
+User=root
 WorkingDirectory=/home/paul/myprojects/myclock
 Environment="PATH=/home/paul/.virtualenvs/myclock/bin:/usr/local/bin:/usr/bin:/bin"
 
-ExecStartPre=-/bin/cp -b /home/paul/myprojects/myclock/myclock.stdout \
-        /home/paul/myprojects/myclock/myclock.stdout.old
-ExecStartPre=-/bin/cp -b /home/paul/myprojects/myclock/myclock.stderr \
-        /home/paul/myprojects/myclock/myclock.stderr.old
+ExecStartPre=-/bin/cp -b /home/paul/myprojects/myclock/myclock.stdout /home/paul/myprojects/myclock/myclock.stdout.old
+ExecStartPre=-/bin/cp -b /home/paul/myprojects/myclock/myclock.stderr /home/paul/myprojects/myclock/myclock.stderr.old
 ExecStartPre=-/bin/rm -f /home/paul/myprojects/myclock/myclock.stdout
 ExecStartPre=-/bin/rm -f /home/paul/myprojects/myclock/myclock.stderr
 
-#ExecStartPre=/bin/systemctl stop -- no-block myclockwaiting
+ExecStartPre=-/bin/systemctl stop --no-block myclockwaiting.service
 
 ExecStart=/home/paul/.virtualenvs/myclock/bin/python -u /home/paul/myprojects/myclock/myclock.py -b 0
 
-StandardOutput=file:/home/paul/myprojects/myclock/myclock.stdout
-StandardError=file:/home/paul/myprojects/myclock/myclock.stderr
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target

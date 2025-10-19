@@ -1,12 +1,15 @@
 ############################################
 #
-#	myclock project v1.2
+#	myclock project v1.2.1
 #
 #	October 18, 2025
 #
 ############################################
 
 Change Log
+
+2025-10-19
+	Tweaked myclock.service and myclockwaiting.service
 
 2025-10-18
 	Modified myclock.service file to wait until

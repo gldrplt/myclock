@@ -1,39 +1,31 @@
 # uses systemd-time-wait-sync.service 
 #sudo systemctl enable systemd-time-wait-sync.service
 #sudo systemctl start systemd-time-wait-sync.service
-
-
 [Unit]
-Description=Start clockwaiting service
-StartLimitIntervalSec=30
-StartLimitBurst=5
+Description=Start myclockwaiting service early
+After=network-online.target 
+Wants=network-online.target
+
+#Before=myclock.service
 
 [Service]
 Type=simple
 Restart=on-failure
 RestartSec=5
+#StartLimitIntervalSec=60
+StartLimitBurst=5
 
-# set User to find locally installed python modules
-User=paul
-
-# signal to kill myclock
-KillSignal=SIGTERM
+User=root
 
 WorkingDirectory=/home/paul/myprojects/myclock
 
-# Set PATH for virtual environment
+Environment="HOME=/home/paul"
 Environment="PATH=/home/paul/.virtualenvs/myclock/bin:/home/paul/bin"
 
+ExecStart=/home/paul/.virtualenvs/myclock/bin/python -u /home/paul/myprojects/myclock/myclockwaiting.py
 
-# ExecStart for virtual env
-ExecStart=python -u myclockwaiting.py
-
-# ExecStart for non virtual env
-#ExecStart=/usr/bin/python -u\
-
-# Define stdout and stderr
-StandardOutput=file:/home/paul/myprojects/myclock/clockwaiting.stdout
-StandardError=file:/home/paul/myprojects/myclock/clockwaiting.stderr
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
