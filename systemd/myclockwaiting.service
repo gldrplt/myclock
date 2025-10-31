@@ -15,17 +15,18 @@ RestartSec=5
 #StartLimitIntervalSec=60
 StartLimitBurst=5
 
-User=root
+User=paul
 
 WorkingDirectory=/home/paul/myprojects/myclock
 
 Environment="HOME=/home/paul"
 Environment="PATH=/home/paul/.virtualenvs/myclock/bin:/home/paul/bin"
 
+ExecStartPre=-/bin/rm /home/paul/myprojects/myclock/myclockwaiting.*
 ExecStart=/home/paul/.virtualenvs/myclock/bin/python -u /home/paul/myprojects/myclock/myclockwaiting.py
 
-StandardOutput=journal
-StandardError=journal
+StandardOutput=file:/home/paul/myprojects/myclock/myclockwaiting.stdout
+StandardError=file:/home/paul/myprojects/myclock/myclockwaiting.stderr
 
 [Install]
 WantedBy=multi-user.target

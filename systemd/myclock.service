@@ -22,8 +22,8 @@ ExecStartPre=-/bin/systemctl stop --no-block myclockwaiting.service
 
 ExecStart=/home/paul/.virtualenvs/myclock/bin/python -u /home/paul/myprojects/myclock/myclock.py -b 0
 
-StandardOutput=journal
-StandardError=journal
+StandardOutput=file:/home/paul/myprojects/myclock/myclock.stdout
+StandardError=file:/home/paul/myprojects/myclock/myclock.stderr
 
 [Install]
 WantedBy=multi-user.target

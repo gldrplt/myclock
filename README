@@ -1,12 +1,15 @@
 ############################################
 #
-#	myclock project v1.2.1
+#	myclock project v1.2.2
 #
-#	October 18, 2025
+#	October 30, 2025
 #
 ############################################
 
 Change Log
+
+2025-10-30
+	shows wait time to sync clock with time server
 
 2025-10-19
 	Tweaked myclock.service and myclockwaiting.service

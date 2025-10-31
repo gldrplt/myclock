@@ -12,19 +12,46 @@ import busio
 import board
 import time
 import signal
+import colorstring as cs
+from datetime import datetime
 
 def stop(signum, frame):
-    
+    end = datetime.now()
     signame = signal.Signals(signum).name   # python < 3.8
-    print("\r  \n", end="")
-    print("(signal sent) "+str(signum) + " " + signame +" " + signal.strsignal(signum), 'byellow')
-    print("(signal sent) Clearing display ...\n")
-
+    printmsg(end, "(signal sent) "+str(signum) + " " + signame +" " + signal.strsignal(signum), 'byellow')
+    dur = end - start
+    printmsg(end, "Wait Time : " + str(dur.total_seconds()) +  " seconds", 'bwhite')
     display.fill(0)
     exit()
+
+def fmtts(time):
+    z = time
+    hms = z.strftime("%H:%M:%S")    # hours:min:sec
+    ms = z.strftime(".%f")          # microseconds 6 digits
+    ms = ms[0:3]                    # 2 digits
+    ts = hms + ms
+    return ts
+
+def printmsg(dto, msg, color = None):
+    
+    ts = dto.strftime("%Y %b %d %H:%M:%S ")   # show date    
+    if msg != "":
+        msg = cs.colorstring(color, ts + msg)
+
+    print(msg)                                      # print msg to stdout
+    
+####################################
+#
+# Program start
+#
+####################################
+start = datetime.now()
+printmsg(start, "Waiting for time sync...", 'bwhite')
+
 # Set signal handler for SIGTERM
 signal.signal(signal.SIGINT, stop)
 signal.signal(signal.SIGTERM, stop)
+signal.signal(signal.SIGUSR1, stop)
 
 # Create the I2C interface.
 i2c = busio.I2C(board.SCL, board.SDA)
