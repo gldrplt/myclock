@@ -6,7 +6,7 @@ def is_time_synchronized():
             ["timedatectl", "show", "-p", "NTPSynchronized"],
             capture_output=True, text=True, check=True
         )
-        output = result.stdout.strip()
+        output = result.stdout.strip()  # strip trailing new line char.
         synced = output.split("=")[-1].lower() == "yes"
         return synced
     except FileNotFoundError:

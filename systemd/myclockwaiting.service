@@ -22,11 +22,13 @@ WorkingDirectory=/home/paul/myprojects/myclock
 Environment="HOME=/home/paul"
 Environment="PATH=/home/paul/.virtualenvs/myclock/bin:/home/paul/bin"
 
-ExecStartPre=-/bin/rm /home/paul/myprojects/myclock/myclockwaiting.*
+ExecStartPre=-/bin/rm /home/paul/myprojects/myclock/myclockwaiting.stdout
+ExecStartPre=-/bin/rm /home/paul/myprojects/myclock/myclockwaiting.stderr
+
 ExecStart=/home/paul/.virtualenvs/myclock/bin/python -u /home/paul/myprojects/myclock/myclockwaiting.py
 
-StandardOutput=file:/home/paul/myprojects/myclock/myclockwaiting.stdout
-StandardError=file:/home/paul/myprojects/myclock/myclockwaiting.stderr
+StandardOutput=journal+file:/home/paul/myprojects/myclock/myclockwaiting.stdout
+StandardError=journal+file:/home/paul/myprojects/myclock/myclockwaiting.stderr
 
 [Install]
 WantedBy=multi-user.target

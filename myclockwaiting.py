@@ -38,14 +38,21 @@ def printmsg(dto, msg, color = None):
     if msg != "":
         msg = cs.colorstring(color, ts + msg)
 
-    print(msg)                                      # print msg to stdout
-    
+    print(msg)      # print msg to stdout
+    # write msg to log file
+    with open("myclockwaiting.log", "a") as file:
+        file.write(msg+'\n')
+
 ####################################
 #
 # Program start
 #
 ####################################
 start = datetime.now()
+# open new log file
+with open("myclockwaiting.log", "w"):
+          pass
+          
 printmsg(start, "Waiting for time sync...", 'bwhite')
 
 # Set signal handler for SIGTERM
