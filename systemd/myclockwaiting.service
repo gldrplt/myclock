@@ -1,12 +1,9 @@
-# uses systemd-time-wait-sync.service 
-#sudo systemctl enable systemd-time-wait-sync.service
-#sudo systemctl start systemd-time-wait-sync.service
+# myclockwaiting.service
+# show blinking clock until network time sync
+
 [Unit]
 Description=Start myclockwaiting service early
-After=network-online.target 
-Wants=network-online.target
-
-#Before=myclock.service
+# Before=myclock
 
 [Service]
 Type=simple
@@ -16,7 +13,6 @@ RestartSec=5
 StartLimitBurst=5
 
 User=paul
-
 WorkingDirectory=/home/paul/myprojects/myclock
 
 Environment="HOME=/home/paul"
@@ -27,8 +23,8 @@ ExecStartPre=-/bin/rm /home/paul/myprojects/myclock/myclockwaiting.stderr
 
 ExecStart=/home/paul/.virtualenvs/myclock/bin/python -u /home/paul/myprojects/myclock/myclockwaiting.py
 
-StandardOutput=journal+file:/home/paul/myprojects/myclock/myclockwaiting.stdout
-StandardError=journal+file:/home/paul/myprojects/myclock/myclockwaiting.stderr
+StandardOutput=file:/home/paul/myprojects/myclock/myclockwaiting.stdout
+StandardError=file:/home/paul/myprojects/myclock/myclockwaiting.stderr
 
 [Install]
 WantedBy=multi-user.target

@@ -1,15 +1,20 @@
 [Unit]
 Description=Start myclock service
-After=myclockwaiting.service network-online.target time-sync.target
-Wants=myclockwaiting.service network-online.target time-sync.target
-# Conflicts=myclockwaiting.service
+#After=myclockwaiting.service network-online.target time-sync.target
+#Wants=myclockwaiting.service network-online.target time-sync.target
+#After=network-online.target time-sync.target
+#Wants=myclockwaiting.service network-online.target time-sync.target
+
+After=systemd-time-wait-sync.service
+Wants=systemd-time-wait-sync.service
 
 [Service]
+PermissionsStartOnly=yes
 Type=simple
 Restart=on-failure
 RestartSec=5
 KillSignal=SIGTERM
-User=root
+User=paul
 WorkingDirectory=/home/paul/myprojects/myclock
 Environment="PATH=/home/paul/.virtualenvs/myclock/bin:/usr/local/bin:/usr/bin:/bin"
 

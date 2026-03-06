@@ -1,6 +1,6 @@
 #######################################
 #
-#   clockwaiting.py
+#   myclockwaiting.py
 #
 #       show blinking segments until
 #       time-sync.target is reached
@@ -15,26 +15,33 @@ import signal
 import colorstring as cs
 from datetime import datetime
 
+class Timer:
+# count up timer
+    def __init__(self):
+        self.start = time.perf_counter()
+
+    def elapsed(self):
+        return time.perf_counter() - self.start
+
+    def elapsed_hms(self):
+        s = int(self.elapsed())
+        h, s = divmod(s, 3600)
+        m, s = divmod(s, 60)
+        return f"{h:02}:{m:02}:{s:02}"
+
 def stop(signum, frame):
-    end = datetime.now()
+    
     signame = signal.Signals(signum).name   # python < 3.8
-    printmsg(end, "(signal sent) "+str(signum) + " " + signame +" " + signal.strsignal(signum), 'byellow')
-    dur = end - start
-    printmsg(end, "Wait Time : " + str(dur.total_seconds()) +  " seconds", 'bwhite')
+    msg = "(signal sent) "+str(signum) + " " + signame +" " + signal.strsignal(signum)
+    printmsg(msg, 'byellow')
+    dur = int(timer.elapsed())
+    msg = "Wait Time : " + str(int(timer.elapsed())) + " seconds"
+    printmsg(msg, 'bwhite')
     display.fill(0)
     exit()
 
-def fmtts(time):
-    z = time
-    hms = z.strftime("%H:%M:%S")    # hours:min:sec
-    ms = z.strftime(".%f")          # microseconds 6 digits
-    ms = ms[0:3]                    # 2 digits
-    ts = hms + ms
-    return ts
-
-def printmsg(dto, msg, color = None):
-    
-    ts = dto.strftime("%Y %b %d %H:%M:%S ")   # show date    
+def printmsg(msg, color = None):
+    ts = date + timer.elapsed_hms()+ " "
     if msg != "":
         msg = cs.colorstring(color, ts + msg)
 
@@ -48,12 +55,15 @@ def printmsg(dto, msg, color = None):
 # Program start
 #
 ####################################
-start = datetime.now()
+datedto = datetime.now() # get date
+date = datedto.strftime("%Y %b %d ")
+
+timer = Timer()     # start timer
 # open new log file
 with open("myclockwaiting.log", "w"):
           pass
           
-printmsg(start, "Waiting for time sync...", 'bwhite')
+printmsg("Waiting for time sync...", 'bwhite')
 
 # Set signal handler for SIGTERM
 signal.signal(signal.SIGINT, stop)
@@ -80,5 +90,7 @@ try:
         time.sleep(1)
         display.colon = False
         time.sleep(1)
+#        display.fill(0)
+#        time.sleep(1)
 except:
     display.fill(0)
