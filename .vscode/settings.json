@@ -1,0 +1,7 @@
+{
+    "python.defaultInterpreterPath": "/home/paul/.virtualenvs/myclock/bin/python",
+    "python.terminal.activateEnvironment": true,
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "python-envs.defaultEnvManager": "ms-python.python:system",
+}
+
