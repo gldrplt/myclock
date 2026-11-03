@@ -1,14 +1,13 @@
 # mc_Functions.py
 #
-#   Functions used by GarageWeb application
+#   Functions used by myclock application
 import os
 import getopt
 
 def trimlog(logfile, logdays, splitstr):
     try:
-        f = open(logfile,'r')
-        z = f.read()        # get current log file data
-        f.close()
+        with open(logfile,'r') as f:
+            z = f.read()        # read entire logfile
         a = z.split(splitstr)
         i = len(a)
         if i <= logdays + 1:     # check if log file exceeds gwLogDays
@@ -36,10 +35,8 @@ def trimlog(logfile, logdays, splitstr):
 
 
     #   write trimmed logfile
-    f = open(logfile,'w')	
-    f.write(outlog)   
-    f.close()
-
+    with open(logfile,'w') as f:
+        f.write(outlog)
 
 # ######################################
 # #

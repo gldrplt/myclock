@@ -32,10 +32,12 @@ try:
     print("finished pass 1")
     
     while True:
-        s0 =  int(r.randint(0,8))
-        s1 =  int(r.randint(0,8))
-        s2 =  int(r.randint(0,8))
-        s3 =  int(r.randint(0,8))
+        s0 =  int(r.randint(0,128))
+        s1 =  int(r.randint(0,128))
+        s2 =  int(r.randint(0,128))
+        s3 =  int(r.randint(0,128))
+
+        print(s0,s1,s2,s3)
 
         display.set_digit_raw(0,s0)
         display.set_digit_raw(1,s1)

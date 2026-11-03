@@ -38,18 +38,29 @@ class mysegments(segments.Seg7x4):
     def __init__(self, i2c):
         # invoke the init class of segments.Seg7x4
         super().__init__(i2c)
-    
+
     def myfill(self, arg):
-        self.arg = arg
-        if showflag == True:
-            self.fill(self.arg)
+        if showflag:    
+            self.fill(arg)
         else:
             self.fill(0)
 
     def myprint(self, arg):
-        self.arg = arg
-        if showflag == True:
-            self.print(self.arg)
+        if showflag:
+            self.print(arg)
+
+    # def myfill(self, arg):
+    #     self.arg = arg
+    #     if showflag == True:
+    #         self.fill(self.arg)
+    #     else:
+    #         self.fill(0)
+
+    # def myprint(self, arg):
+    #     self.arg = arg
+    #     if showflag == True:
+    #         self.print(self.arg)
+
 
 def showclock(display, threadevent, msgevent):
     global threadflag
@@ -71,37 +82,29 @@ def showclock(display, threadevent, msgevent):
 
             try:
                 while showflag:
-                    # loop 3 times to show time
-                    for i in range(3):
-                        # get system time and date
-                        now = datetime.now()
-                        # format month/year for display of date
-                        date = now.strftime("%m%d")
-                        # format time
-                        if milflag == False:
-                            clock = now.strftime("%I%M")    # HH:MM 12h
-                        else:
-                            clock = now.strftime("%H%M")    # HH:MM 24h
+                    now = datetime.now()
+                    #date = datetime.now().strftime("%m%d")
+                    date = f"{now.month:02d}{now.day:02d}" # format mmdd
 
-                        # display time hh:mm               
-                        display.myprint(clock)
-                                
-                        # Toggle colon when displaying time
-                        t = time.time()
-                        dur = t - colontime
-                        if dur >= .8:
-                            display.myprint(":")      # show colon
-                            colontime = time.time() # reset colon time
-                        else:
-                            display.myprint(";")  # blank colon
-        
-                        time.sleep(0.7)
+                    # test for military time
+                    if milflag == True:
+                        # Show 24-hour time, with leading zeros.
+                        display.print(f"{now.hour:02d}{now.minute:02d}")
+                    else:
+                        # Show 12-hour time
+                        display.print(now.strftime("%I%M"))
+                    
+                    # Blink the colon once per second.
+                    # use modulo 2 to show colon on even seconds
+                    display.colon = (now.second % 2 == 0)
 
-                    # if dateflag display date
-                    if dateflag:
-                        display.myprint(";")
-                        display.myprint(date)
-                        time.sleep(0.7)
+                    # if dateflag pause show date and pause
+                    if dateflag == True:
+                        time.sleep(1)
+                        display.print(date)
+                        time.sleep(1)
+                    else:
+                        time.sleep(1)
 
             except KeyboardInterrupt:
                 printmsg("(thread) Keyboard Interrupt thrown ...")
@@ -178,9 +181,8 @@ def printmsg(msg, color = None):
     print(msg)                             # print msg to stdout
     
     x = msg + "\n"                         # add new line symbol to msg
-    f = open(logfile, "a")                      # write msg to log file
-    f.write(x)
-    f.close()
+    with open(logfile, "a") as f:          # write msg to log file
+        f.write(x)
 
 def printstderr(msg):   # print to stderr
     z=datetime.now()
@@ -335,12 +337,10 @@ while runflag:
         while True:
             if parm == "":
                 printmsg("(main) ... waiting for message event\n")
-                f = open(pipefile, "r")     # read from clockpipe
-                                            # system will block until other end
-                                            # is connected
-                parm = f.readline()
-                f.close()
-
+                with open(pipefile, "r") as f: # read from clockpipe
+                    parm = f.readline()        # system will block until other end is connected
+                                               # system will block until other end
+                                               # is connected
             parm = parm.rstrip()        # remove \n if present                
 
             showparm = "[ " + parm + " ]"
@@ -359,7 +359,8 @@ while runflag:
             if parm == "+m" :
                 printmsg("(main) ... display military time ...")
                 milflag = True
-            elif parm == "-m":
+
+            if parm == "-m":
                 printmsg("(main) ... display standard 12hr time ...")
                 milflag = False
 
@@ -374,13 +375,9 @@ while runflag:
 
             if parm == "+s":
                 printmsg("(main) ... show clock ... " + showparm)
+                dateflag = False
                 showflag = True
 
-            if parm =="-f":
-                printmsg("(main) ... fill display ... " + showparm)
-                showflag = False
-                display.fill(1)
-                
             if parm =="+d":
                 printmsg("(main) ... show time and date ... " + showparm)
                 dateflag = True
@@ -390,6 +387,11 @@ while runflag:
                 printmsg("(main) ... show time only ... " + showparm)
                 dateflag = False
                 showflag = True
+
+            if parm =="-f":
+                printmsg("(main) ... fill display ... " + showparm)
+                showflag = False
+                display.fill(1)
 
             if parm == "--nodate":
                 logdateflag = False

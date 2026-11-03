@@ -83,14 +83,30 @@ display.brightness = 0
 
 # clear display
 display.fill(1)
+time.sleep(1.5)
 
+segments = [1,2,64,16,8,4,32]   # segment bits for 7-segment display
+colon = True
+# cycle through each segment
+for segment in segments:
+    display.set_digit_raw(0,segment)
+    display.set_digit_raw(1,segment)
+    display.set_digit_raw(2,segment)
+    display.set_digit_raw(3,segment)
+    display.colon = colon
+    colon = not colon
+    time.sleep(0.5)
+
+display.fill(0) # clear display
 try:
     while True:
-        display.print("00:00")
+        now = timer.elapsed()
+        t = int(now)
+        colon = (t % 2 == 0)
+        t = f"{t:04d}"
+        display.colon = colon
+        print (t)
+        display.print(t)
         time.sleep(1)
-        display.colon = False
-        time.sleep(1)
-#        display.fill(0)
-#        time.sleep(1)
 except:
     display.fill(0)
