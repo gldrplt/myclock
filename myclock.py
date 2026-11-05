@@ -101,8 +101,11 @@ def showclock(display, threadevent, msgevent):
                     # if dateflag pause show date and pause
                     if dateflag == True:
                         time.sleep(1)
+                        now = datetime.now()
+                        display.colon = not display.colon
                         display.print(date)
                         time.sleep(1)
+                        
                     else:
                         time.sleep(1)
 
@@ -168,7 +171,7 @@ def fmtts(time):
 def printmsg(msg, color = None):
     z = datetime.now()                          # get current time
     if "Launching" in msg:
-        ts = z.strftime("\n%Y %b %d %H:%M:%S ")   # format time stamp for Launch msg
+        ts = z.strftime("%Y %b %d %H:%M:%S ")   # format time stamp for Launch msg
     else:
         if logdateflag:                             # format time stamp for all other msg
             ts = z.strftime("%Y %b %d %H:%M:%S ")   # show date
