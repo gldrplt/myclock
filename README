@@ -1,8 +1,8 @@
 ############################################
 #
-#	myclock project v1.2.2
+#	myclock project v2.0.3
 #
-#	October 30, 2025
+#	November 5, 2026
 #
 ############################################
 
@@ -49,3 +49,5 @@ Change Log
 
 14. Cleaned up myclock.py to show correct month/day
 
+2026-11-05
+    myclock.py checks that display is attached
