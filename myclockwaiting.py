@@ -71,13 +71,18 @@ signal.signal(signal.SIGTERM, stop)
 signal.signal(signal.SIGUSR1, stop)
 
 # Create the I2C interface.
+
 i2c = busio.I2C(board.SCL, board.SDA)
 
 # Create the LED segment class.
 # This creates a 7 segment 4 character display:
-display = segments.Seg7x4(i2c)
-#display = segments(i2c)    # use subclass mysegments
-
+try:
+    display = segments.Seg7x4(i2c)
+    #display = segments(i2c)    # use subclass mysegments
+except Exception as e:
+    printmsg("Error creating display: " + str(e), 'bred')
+    exit()
+    
 # set brightness
 display.brightness = 0
 
