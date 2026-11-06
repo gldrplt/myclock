@@ -26,7 +26,7 @@ from datetime import datetime
 from adafruit_ht16k33 import segments
 import board
 import busio
-import mc_Functions as mcf
+from trimlog import trimlog
 import colorstring as cs
 import sendemail
 
@@ -229,18 +229,18 @@ def procparmstr(parmstr):
 
     except getopt.GetoptError as err:
         printmsg("")
-        msg = "(main) Exception: "+str(err) + "\n"
+        msg = "(main)   Exception: "+str(err) + "\n"
         printmsg(msg, 'bred')
-        printmsg("(main) SystemExit raised ...\n", 'byellow')
-        printmsg("(main) Exiting myclock.py ...\n", 'bwhite')
+        printmsg("(main)   SystemExit raised ...\n", 'byellow')
+        printmsg("(main)   Exiting myclock.py ...\n", 'bwhite')
         sys.exit(2) # set return code
         
     except Exception as err:
         printmsg("")
-        msg = "(main) Exception: "+str(err) + str(parmstr) + "\n"
+        msg = "(main)   Exception: "+str(err) + str(parmstr) + "\n"
         printmsg(msg, 'bred')
-        printmsg("(main) SystemExit raised ...\n", 'byellow')
-        printmsg("(main) Exiting myclock.py ...\n", 'bwhite')
+        printmsg("(main)   SystemExit raised ...\n", 'byellow')
+        printmsg("(main)   Exiting myclock.py ...\n", 'bwhite')
         sys.exit(2)
     
     clparm = tparm      # initial parm
@@ -272,7 +272,7 @@ def sendmail():
     message sent from myclock.py"""
 
     sendemail.sendmail(sender, receiver, subject, msg)    
-    printmsg("(main) Program exception email sent ...\n", 'byellow')
+    printmsg("(main)   Program exception email sent ...\n", 'byellow')
 
 ###################################    
 #   Start of Program
@@ -321,10 +321,10 @@ else:
 # trim log file to 4 days
 logdays = 5
 splitstr = "Launching"
-mcf.trimlog(logfile, logdays, splitstr)
+trimlog(logfile, logdays, splitstr)
 
 # print start message to stdout
-msg = "Launching 4 digit 7 segment display"
+msg = "Launching 4 digit 7 segment display\n"
 printmsg(msg, 'bwhite')
 print("PID = ",os.getpid())
 
@@ -343,7 +343,7 @@ while runflag:
     try:
         while True:
             if parm == "":
-                printmsg("(main) ... waiting for message event\n")
+                printmsg("(main)   ... waiting for message event\n")
                 with open(pipefile, "r") as f: # read from clockpipe
                     parm = f.readline()        # system will block until other end is connected
                                                # system will block until other end
@@ -356,57 +356,57 @@ while runflag:
             if z[0] == "-b":
                 if len(z) == 2 and z[1].isnumeric():   # check if brightness set
                     br=float(z[1])
-                    printmsg("(main) ... setting display brightness " + z[1])
+                    printmsg("(main)   ... setting display brightness " + z[1])
                     display.brightness = br
                 else:
-                    printmsg("(main) ... Invalid display brightness ") # no brightness set
+                    printmsg("(main)   ... Invalid display brightness ") # no brightness set
                     display.brightness = 0
                 showflag = True
 
             if parm == "+m" :
-                printmsg("(main) ... display military time ...")
+                printmsg("(main)   ... display military time ...")
                 milflag = True
 
             if parm == "-m":
-                printmsg("(main) ... display standard 12hr time ...")
+                printmsg("(main)   ... display standard 12hr time ...")
                 milflag = False
 
             if parm == "-k":
-                printmsg("(main) ... kill myclock.py ... " + showparm)
+                printmsg("(main)   ... kill myclock.py ... " + showparm)
                 raise SystemExit
 
             if parm == "-s":
-                printmsg("(main) ... blanking display ... " + showparm)
+                printmsg("(main)   ... blanking display ... " + showparm)
                 showflag = False
                 display.fill(0)
 
             if parm == "+s":
-                printmsg("(main) ... show clock ... " + showparm)
+                printmsg("(main)   ... show clock ... " + showparm)
                 dateflag = False
                 showflag = True
 
             if parm =="+d":
-                printmsg("(main) ... show time and date ... " + showparm)
+                printmsg("(main)   ... show time and date ... " + showparm)
                 dateflag = True
                 showflag = True
             
             if parm =="-d":
-                printmsg("(main) ... show time only ... " + showparm)
+                printmsg("(main)   ... show time only ... " + showparm)
                 dateflag = False
                 showflag = True
 
             if parm =="-f":
-                printmsg("(main) ... fill display ... " + showparm)
+                printmsg("(main)   ... fill display ... " + showparm)
                 showflag = False
                 display.fill(1)
 
             if parm == "--nodate":
                 logdateflag = False
-                printmsg("(main) ... do not show full date yyyy/mm/dd in log file ...")
+                printmsg("(main)   ... do not show full date yyyy/mm/dd in log file ...")
 
             if parm == "--date":
                 logdateflag = True
-                printmsg("(main) ... show full date yyyy/mm/dd in log file ...")
+                printmsg("(main)   ... show full date yyyy/mm/dd in log file ...")
 
             msgevent.set()              # set msgevent
 
@@ -416,7 +416,7 @@ while runflag:
         runflag = False
         threadflag = False
         print("\r  ", end="")
-        printmsg("(main) User raised exception Ctrl-C ...")
+        printmsg("(main)   User raised exception Ctrl-C ...")
         printstderr("(stderr) User pressed Ctrl-c ...")
         
     except SystemExit:
@@ -424,7 +424,7 @@ while runflag:
         threadflag = False
         showflag = False
         printmsg("")
-        printmsg("(main) SystemExit raised ...", 'byellow')
+        printmsg("(main)   SystemExit raised ...", 'byellow')
     
     except Exception as error:
         myrc = 1    # set returncode
@@ -432,24 +432,24 @@ while runflag:
         threadflag = False
         errorname = type(error).__name__
     
-        printmsg("(main) Exception thrown ...")
-        printmsg("(main) Exception Name = " + type(error).__name__)
+        printmsg("(main)   Exception thrown ...")
+        printmsg("(main)   Exception Name = " + type(error).__name__)
         if emailflag == True:
             sendmail()      # send email
         z=datetime.now()
         ts = z.strftime("%Y %b %d %H:%M:%S ")
-        print(ts + "Trace from (main) ...\n", file=sys.stderr)
+        print(ts + "Trace from (main)   ...\n", file=sys.stderr)
         import traceback
         traceback.print_exc()
 
     finally:
         pass
 
-printmsg("(main) Clearing display ...\n")
+printmsg("(main)   Clearing display ...\n")
 
 # clear display
 display.fill(0)
 
-printmsg("(main) Exiting myclock.py ...\n", 'bwhite')
+printmsg("(main)   Exiting myclock.py ...\n", 'bwhite')
 sys.exit(myrc)
 # exit(myrc)

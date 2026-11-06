@@ -1,6 +1,5 @@
-# mc_Functions.py
-#
-#   Functions used by myclock application
+# trimlog.py
+
 import os
 def trimlog(logfile, logdays, splitstr):
 #   trim log file to specified number of days
@@ -57,15 +56,13 @@ def trimlog(logfile, logdays, splitstr):
 
 # ######################################
 # #
-# #   mc_Functions.py
+# #   trimlog.py
 # #
 # ######################################
 
-# path = os.path.dirname(os.path.abspath(__file__))
-# logfile = path + "/test.log"
-# logdays = 4
-# split = "Launching"
+if __name__ == '__main__':
+    logfile = input("Enter logfile: ")
+    logdays = input("Enter log days : ")
+    splitstr = input("Enter split string: ")
+    trimlog(logfile, int(logdays), splitstr)
 
-# trimlog(logfile,logdays,split)
-
-# print(" finished")
