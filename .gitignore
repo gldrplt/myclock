@@ -5,7 +5,10 @@ clockpipe
 *.stdout*
 *.stderr*
 *.log
+
 *.txt
+!requirements.txt
+
 *.new
 *.old
 *.old~
