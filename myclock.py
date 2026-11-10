@@ -72,7 +72,7 @@ def showclock(display, threadevent, msgevent):
     threadevent.set()   # set thread started event    
     try:
         while threadflag:
-            printmsg("(thread) ... waiting for message event\n")
+#            printmsg("(thread) ... waiting for message event\n")
             msgevent.clear()
             msgevent.wait()    # wait for message
             msgevent.clear()
@@ -326,9 +326,9 @@ display.fill(0)
 clparm = sys.argv[1:]
 procparmstr(clparm)
 if clparm == "":
-    parm = "-b 0"    # default options
+    readparm = "-b 0"    # default options
 else:
-    parm = clparm
+    readparm = clparm
     
 # trim log file to 4 days
 logdays = 5
@@ -355,17 +355,16 @@ threadevent.wait()
 while runflag:
     try:
         while True:
-            if parm == "":
-                printmsg("(main)   ... waiting for message event\n")
+            if readparm == "":
+                printmsg("(main)   ... waiting for User command ...\n")
                 with open(pipefile, "r") as f: # read from clockpipe
-                    parm = f.readline()        # system will block until other end is connected
-                                               # system will block until other end
-                                               # is connected
-            parm = parm.rstrip()        # remove \n if present                
-
+                    readparm = f.readline()    # system will block until other end is connected
+            parm = readparm.rstrip()           # remove \n if present                
+            readparm = ""                      # clear readparm for next read
+            
+            # process parm
             showparm = "[ " + parm + " ]"
             z = parm.split(" ")
-
             if z[0] == "-b":
                 if len(z) == 2 and z[1].isnumeric():   # check if brightness set
                     br=float(z[1])
@@ -376,6 +375,10 @@ while runflag:
                     display.brightness = 0
                 showflag = True
 
+            if parm == "-k":
+                printmsg("(main)   ... kill myclock.py ... " + showparm)
+                raise SystemExit
+
             if parm == "+m" :
                 printmsg("(main)   ... display military time ...")
                 milflag = True
@@ -383,15 +386,6 @@ while runflag:
             if parm == "-m":
                 printmsg("(main)   ... display standard 12hr time ...")
                 milflag = False
-
-            if parm == "-k":
-                printmsg("(main)   ... kill myclock.py ... " + showparm)
-                raise SystemExit
-
-            if parm == "-s":
-                printmsg("(main)   ... blanking display ... " + showparm)
-                showflag = False
-                display.fill(0)
 
             if parm == "+s":
                 printmsg("(main)   ... show clock ... " + showparm)
@@ -412,17 +406,21 @@ while runflag:
                 printmsg("(main)   ... fill display ... " + showparm)
                 showflag = False
                 display.fill(1)
+                continue
+
+            if parm == "-s":
+                printmsg("(main)   ... blanking display ... " + showparm)
+                showflag = False
+                display.fill(0)
 
             if parm == "--nodate":
                 parmshowdate = False
                 printmsg("(main)   ... do not show full date yyyy/mm/dd in log file ...")
-                parm = ""
                 continue
 
             if parm == "--date":
                 parmshowdate = True
                 printmsg("(main)   ... show full date yyyy/mm/dd in log file ...")
-                parm = ""
                 continue
 
             msgevent.set()              # set msgevent
