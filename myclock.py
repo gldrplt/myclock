@@ -76,14 +76,10 @@ def showclock(display, threadevent, msgevent):
             msgevent.clear()
             msgevent.wait()    # wait for message
             msgevent.clear()
-            # build month/year for display of date
-            # date = datetime.now().strftime("%m%d")
-            colontime = time.time() - 0.5
 
             try:
                 while showflag:
                     now = datetime.now()
-                    #date = datetime.now().strftime("%m%d")
                     date = f"{now.month:02d}{now.day:02d}" # format mmdd
 
                     # test for military time
@@ -101,7 +97,7 @@ def showclock(display, threadevent, msgevent):
                     # if dateflag pause show date and pause
                     if dateflag == True:
                         time.sleep(1)
-                        now = datetime.now()
+#                        now = datetime.now()
                         display.colon = not display.colon
                         display.print(date)
                         time.sleep(1)
@@ -169,15 +165,30 @@ def fmtts(time):
     return ts
 
 def printmsg(msg, color = None):
-    z = datetime.now()                          # get current time
+    global today
+    global logdateflag
+
+    # determine if full date should be shown in log file
+    logdateflag = False
+    z = datetime.now()                  # get current time
+    currentdate = z.strftime("%Y%m%d")  # get current date for log file
+    if currentdate != today:    # check if date changed
+        logdateflag = True      # force YYY mm dd in time stamp
+        today = currentdate
+
+    # User override of logdateflag with parmshowdate
+    if parmshowdate == True:    # check if parmshowdate is set
+        logdateflag = True      # force YYY mm dd in time stamp
+
+    # If message contains "Launching" then force logdateflag to True
     if "Launching" in msg:
-        ts = z.strftime("%Y %b %d %H:%M:%S ")   # format time stamp for Launch msg
+        logdateflag = True           # force YYY mm dd in time stamp
+        
+    if logdateflag:                             # format time stamp for all other msg
+        ts = z.strftime("%Y %b %d %H:%M:%S:%f ")   # show date
     else:
-        if logdateflag:                             # format time stamp for all other msg
-            ts = z.strftime("%Y %b %d %H:%M:%S ")   # show date
-        else:
-            ts = z.strftime("\t    %H:%M:%S:%f ")       # don't show date
-    
+        ts = z.strftime("\t    %H:%M:%S:%f ")   # don't show date
+
     if msg != "":
         msg = cs.colorstring(color, ts + msg)
 
@@ -280,6 +291,7 @@ def sendmail():
 
 dateflag = False     # show clock and date flag
 logdateflag = False
+parmshowdate = False
 emailflag = False
 myrc = 0
 threadevent = Event()   # flag to wait for showclock thread
@@ -324,6 +336,7 @@ splitstr = "Launching"
 trimlog(logfile, logdays, splitstr)
 
 # print start message to stdout
+today = datetime.now().strftime("%Y%m%d")   # get today date for log file
 msg = "Launching 4 digit 7 segment display\n"
 printmsg(msg, 'bwhite')
 print("PID = ",os.getpid())
@@ -401,12 +414,16 @@ while runflag:
                 display.fill(1)
 
             if parm == "--nodate":
-                logdateflag = False
+                parmshowdate = False
                 printmsg("(main)   ... do not show full date yyyy/mm/dd in log file ...")
+                parm = ""
+                continue
 
             if parm == "--date":
-                logdateflag = True
+                parmshowdate = True
                 printmsg("(main)   ... show full date yyyy/mm/dd in log file ...")
+                parm = ""
+                continue
 
             msgevent.set()              # set msgevent
 
