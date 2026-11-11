@@ -11,6 +11,8 @@
 #			-f fill display - all segments on
 #			+d show time and date
 #			-d show time only
+#           --date show date on log file entries
+#           --nodate do not show date on log file entries
 
 source $HOME/.bash_functions
 
@@ -40,7 +42,11 @@ OPTION:
 	-b <0-1> set display brightness
 	
 	-f fill display - all segments on
-	
+    
+	--date do not show date on log file entries
+    
+	--nodate show date on log file entries
+    
 	-k kill clock
 	
 	? show this message
