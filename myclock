@@ -66,22 +66,23 @@ OPTION:
 
 pgm=$( realpath $0 )	# get realpath and name of running script
 pgmpath="${pgm%/*}"		# get path
-
 pipe=$pgmpath/clockpipe	# check for pipe file
+
 if [ ! -p "$pipe" ]; then
 	echo -e "\nNamed pipe $pipe does not exist\n\nexiting script ...\n"
+	echo "pipe = $pipe"
 	exit 1
 fi
 
 prompt=$(fwhite "(myclock): ")
 
-isrunning=$(ps axg | grep myclock.py | grep -v grep)
+isrunning=$(pgrep -f '[m]yclock\.py')
+
 if [[ $isrunning != "" ]] && [[ $1 == "" ]]; then
 	echo -e "\n"$prompt"myclock.py already running ...\n\nexiting script ...\n"
 	exit 2
 fi
 
-echo
 msgsent="n"	# set message not sent
 if [[ $isrunning == "" ]] && [[ $1 != "-k" ]]; then 
 	if [[ -d ~/.virtualenvs/myclock ]]; then		# check if virtual env exists
@@ -96,10 +97,11 @@ if [[ $isrunning == "" ]] && [[ $1 != "-k" ]]; then
 	msgsent="y"	# set message sent
 	echo -e $prompt"Launching 4 digit 7 segment clock\n"
 	cd $pgmpath
-	python myclock.py $@  1>myclock.stdout.sh 2>myclock.stderr.sh &
+	python -u myclock.py $@  1>myclock.stdout.sh 2>myclock.stderr.sh &
 	sleep 1
 	# test if successful
-	isrunning=$(ps axg | grep myclock.py | grep -v grep)
+	#isrunning=$(ps axg | grep myclock.py | grep -v grep)
+    isrunning=$(pgrep -f '[m]yclock\.py')	
 	if [[ $isrunning == "" ]]; then
 		msg=$(fred "myclock.py failed to start ...")
 		echo -e "\n"$prompt$msg
@@ -109,7 +111,7 @@ if [[ $isrunning == "" ]] && [[ $1 != "-k" ]]; then
 		echo -e "\n"$prompt$msg
 		exit 2
 	fi
-	isrunning="t"
+#	isrunning="t"
 fi
 
 # display option selected

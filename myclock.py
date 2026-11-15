@@ -68,12 +68,12 @@ def showclock(display, threadevent, msgevent):
     global errorname
     global myrc
 
-    printmsg("(thread) ... showclock starting\n")
+    printmsg("(thread) ... showclock thread starting ...\n")
     threadevent.set()   # set thread started event    
     try:
         while threadflag:
 #            printmsg("(thread) ... waiting for message event\n")
-            msgevent.clear()
+#            msgevent.clear()
             msgevent.wait()    # wait for message
             msgevent.clear()
 
@@ -382,10 +382,12 @@ while runflag:
             if parm == "+m" :
                 printmsg("(main)   ... display military time ...")
                 milflag = True
+                continue
 
             if parm == "-m":
                 printmsg("(main)   ... display standard 12hr time ...")
                 milflag = False
+                continue
 
             if parm == "+s":
                 printmsg("(main)   ... show clock ... " + showparm)
@@ -412,6 +414,7 @@ while runflag:
                 printmsg("(main)   ... blanking display ... " + showparm)
                 showflag = False
                 display.fill(0)
+                continue
 
             if parm == "--nodate":
                 parmshowdate = False
@@ -424,8 +427,6 @@ while runflag:
                 continue
 
             msgevent.set()              # set msgevent
-
-            parm = ""           # clear parm to wait for next message
 
     except KeyboardInterrupt:
         runflag = False
