@@ -83,6 +83,7 @@ if [[ $isrunning != "" ]] && [[ $1 == "" ]]; then
 	exit 2
 fi
 
+echo
 msgsent="n"	# set message not sent
 if [[ $isrunning == "" ]] && [[ $1 != "-k" ]]; then 
 	if [[ -d ~/.virtualenvs/myclock ]]; then		# check if virtual env exists
